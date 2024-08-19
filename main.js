@@ -8,8 +8,12 @@ const questions = [
         "question": "machen",
         "answers": ["gemacht", "gemachen", "machen", "gemochen"],
         "correct": "gemacht"
+    },
+    {
+        "question": "trinken",
+        "answers": ["getrunken", "getrinken", "getrunkt", "getrankt"],
+        "correct": "getrunken"
     }
-    // Ajoutez d'autres questions ici
 ];
 
 let shuffledQuestions = [];
