@@ -1,13 +1,13 @@
 const questions = [
     {
         "question": "sprachen",
-        "answers": ["to do", "to speak", "to write", "to run"],
-        "correct": "to speak"
+        "answers": ["gesprochen", "gesprachen", "gespricht", "sprachen"],
+        "correct": "gesprochen"
     },
     {
         "question": "machen",
-        "answers": ["to make", "to take", "to see", "to go"],
-        "correct": "to make"
+        "answers": ["gemacht", "gemachen", "machen", "gemochen"],
+        "correct": "gemacht"
     }
     // Ajoutez d'autres questions ici
 ];
@@ -58,13 +58,19 @@ function checkAnswer(selectedAnswer) {
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
     if (selectedAnswer === currentQuestion.correct) {
         score++;
-        resultElement.textContent = "Correct!";
+        resultElement.textContent = "Genau!";
+        resultElement.className = "correct";
     } else {
-        resultElement.textContent = "Incorrect!";
+        resultElement.textContent = "Schade!";
+        resultElement.className = "incorrect";
     }
 
+    resultElement.style.display = "block";
+    resultElement.classList.add("show-result");
+
     setTimeout(() => {
-        resultElement.textContent = "";
+        resultElement.style.display = "none";
+        resultElement.classList.remove("show-result");
         currentQuestionIndex = (currentQuestionIndex + 1) % shuffledQuestions.length;
         loadQuestion();
     }, 1000);
