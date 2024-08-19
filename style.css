@@ -12,7 +12,7 @@ body, html {
 }
 
 .screen {
-    display: none;
+    display: flex;
 }
 
 .screen.hidden {
@@ -20,7 +20,6 @@ body, html {
 }
 
 #start-screen, #quiz-container, #result-screen {
-    display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
