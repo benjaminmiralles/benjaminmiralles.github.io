@@ -12,6 +12,7 @@ const questions = [
     // Ajoutez d'autres questions ici
 ];
 
+let shuffledQuestions = [];
 let currentQuestionIndex = 0;
 let score = 0;
 let totalQuestions = 0;
@@ -32,21 +33,29 @@ document.getElementById("restart-btn").addEventListener("click", restartQuiz);
 function startQuiz() {
     startScreen.classList.add("hidden");
     quizContainer.classList.remove("hidden");
+
+    shuffledQuestions = shuffleArray(questions);
+    currentQuestionIndex = 0;
+    score = 0;
+    totalQuestions = 0;
+
     loadQuestion();
 }
 
 function loadQuestion() {
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
     questionElement.textContent = currentQuestion.question;
+
+    const shuffledAnswers = shuffleArray(currentQuestion.answers);
     answerButtons.forEach((button, index) => {
-        button.textContent = currentQuestion.answers[index];
+        button.textContent = shuffledAnswers[index];
         button.onclick = () => checkAnswer(button.textContent);
     });
 }
 
 function checkAnswer(selectedAnswer) {
     totalQuestions++;
-    const currentQuestion = questions[currentQuestionIndex];
+    const currentQuestion = shuffledQuestions[currentQuestionIndex];
     if (selectedAnswer === currentQuestion.correct) {
         score++;
         resultElement.textContent = "Correct!";
@@ -56,7 +65,7 @@ function checkAnswer(selectedAnswer) {
 
     setTimeout(() => {
         resultElement.textContent = "";
-        currentQuestionIndex = (currentQuestionIndex + 1) % questions.length;
+        currentQuestionIndex = (currentQuestionIndex + 1) % shuffledQuestions.length;
         loadQuestion();
     }, 1000);
 }
@@ -68,9 +77,14 @@ function endQuiz() {
 }
 
 function restartQuiz() {
-    score = 0;
-    totalQuestions = 0;
-    currentQuestionIndex = 0;
     resultScreen.classList.add("hidden");
     startScreen.classList.remove("hidden");
+}
+
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
