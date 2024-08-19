@@ -1,0 +1,12 @@
+[
+    {
+        "question": "sprachen",
+        "answers": ["to do", "to speak", "to write", "to run"],
+        "correct": "to speak"
+    },
+    {
+        "question": "machen",
+        "answers": ["to make", "to take", "to see", "to go"],
+        "correct": "to make"
+    }
+]
