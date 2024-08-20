@@ -44,16 +44,6 @@ function startQuiz() {
     score = 0;
     totalQuestions = 0;
 
-    // loadQuestion();
-
-    /*fetch('questions.json')
-        .then(response => response.json())
-        .then(data => {
-            shuffledQuestions = shuffleArray(data);
-            loadQuestion();
-        })
-        .catch(error => console.error('Erreur de chargement des questions :', error));*/
-
         fetch('questions.json')
         .then(response => response.json())
         .then(data => {
@@ -67,8 +57,17 @@ function startQuiz() {
             loadQuestion();
         })
         .catch(error => {
-            console.error('Erreur de chargement des questions :', error);
-            loadingScreen.innerHTML = '<h1>Erreur de chargement des questions</h1>';
+            // console.error('Erreur de chargement des questions :', error);
+            // loadingScreen.innerHTML = '<h1>Erreur de chargement des questions</h1>';
+            
+            shuffledQuestions = shuffleArray(questions);
+            currentQuestionIndex = 0;
+            score = 0;
+            totalQuestions = 0;
+            loadingScreen.classList.add("hidden"); // Cacher l'écran de chargement
+            quizContainer.classList.remove("hidden"); // Afficher le quiz
+            loadQuestion();
+
         });
 }
 
