@@ -36,7 +36,7 @@
     },
     {
         "question": "kommen",
-        "answers": ["gekommen", "gekamen", "gekomt", "gekommen"],
+        "answers": ["gekommen", "gekamen", "gekomt", "gekommt"],
         "correct": "gekommen"
     },
     {
@@ -126,7 +126,7 @@
     },
     {
         "question": "lesen",
-        "answers": ["gelesen", "gelesen", "geliest", "geläsen"],
+        "answers": ["gelesen", "gelest", "geliest", "geläsen"],
         "correct": "gelesen"
     },
     {
@@ -160,18 +160,13 @@
         "correct": "geflogen"
     },
     {
-        "question": "stehen",
-        "answers": ["gestanden", "gesteht", "gestendet", "gestiehn"],
-        "correct": "gestanden"
-    },
-    {
         "question": "fallen",
         "answers": ["gefallen", "gefallt", "geflohen", "gefelt"],
         "correct": "gefallen"
     },
     {
         "question": "beginnen",
-        "answers": ["begonnen", "begonnen", "begunn", "begangen"],
+        "answers": ["begonnen", "beginnt", "begunn", "begangen"],
         "correct": "begonnen"
     },
     {
@@ -186,17 +181,17 @@
     },
     {
         "question": "ziehen",
-        "answers": ["gezogen", "gezieht", "gezogen", "gezohen"],
+        "answers": ["gezogen", "gezieht", "ziehen", "gezohen"],
         "correct": "gezogen"
     },
     {
         "question": "treffen",
-        "answers": ["getroffen", "getroffen", "getrift", "getroffet"],
+        "answers": ["getroffen", "getreffen", "getrift", "getroffet"],
         "correct": "getroffen"
     },
     {
         "question": "rufen",
-        "answers": ["gerufen", "geruft", "geröfft", "gerufen"],
+        "answers": ["gerufen", "geruft", "geröfft", "gerofen"],
         "correct": "gerufen"
     },
     {
@@ -215,11 +210,6 @@
         "correct": "gesungen"
     },
     {
-        "question": "stehen",
-        "answers": ["gestanden", "gestiehn", "gestehn", "gestanden"],
-        "correct": "gestanden"
-    },
-    {
         "question": "scheinen",
         "answers": ["geschienen", "gescheint", "geschön", "geschinet"],
         "correct": "geschienen"
@@ -228,11 +218,6 @@
         "question": "riechen",
         "answers": ["gerochen", "geröchen", "geriecht", "gerachen"],
         "correct": "gerochen"
-    },
-    {
-        "question": "ziehen",
-        "answers": ["gezogen", "gezohen", "gezogt", "geziehen"],
-        "correct": "gezogen"
     },
     {
         "question": "bringen",
@@ -256,12 +241,12 @@
     },
     {
         "question": "kennen",
-        "answers": ["gekannt", "gekönet", "gekent", "gekonet"],
+        "answers": ["gekannt", "gekönet", "gekent", "gekönt"],
         "correct": "gekannt"
     },
     {
         "question": "senden",
-        "answers": ["gesandt", "gesendet", "gesent", "gesandt"],
+        "answers": ["gesandt", "gesendet", "gesent", "gesentet"],
         "correct": "gesandt"
     },
     {
@@ -276,7 +261,7 @@
     },
     {
         "question": "streiten",
-        "answers": ["gestritten", "gestreitet", "gestritten", "gestroten"],
+        "answers": ["gestritten", "gestreitet", "gestreiten", "gestroten"],
         "correct": "gestritten"
     },
     {
@@ -291,13 +276,8 @@
     },
     {
         "question": "fangen",
-        "answers": ["gefangen", "gefangt", "gefangen", "gefängt"],
+        "answers": ["gefangen", "gefangt", "gefanget", "gefängt"],
         "correct": "gefangen"
-    },
-    {
-        "question": "tragen",
-        "answers": ["getragen", "getrogt", "getrugen", "geträgen"],
-        "correct": "getragen"
     },
     {
         "question": "raten",
@@ -310,13 +290,8 @@
         "correct": "gewaschen"
     },
     {
-        "question": "stehen",
-        "answers": ["gestanden", "gesteht", "gestehn", "gestanden"],
-        "correct": "gestanden"
-    },
-    {
         "question": "brechen",
-        "answers": ["gebrochen", "gebrocht", "gebricht", "gebrochen"],
+        "answers": ["gebrochen", "gebrocht", "gebricht", "brötchen"],
         "correct": "gebrochen"
     },
     {
@@ -341,7 +316,7 @@
     },
     {
         "question": "fließen",
-        "answers": ["geflossen", "gefliest", "geflusst", "geflossen"],
+        "answers": ["geflossen", "gefliest", "geflusst", "gefloßen"],
         "correct": "geflossen"
     },
     {
@@ -351,22 +326,22 @@
     },
     {
         "question": "brennen",
-        "answers": ["gebrannt", "gebrennet", "gebrenten", "gebrannt"],
+        "answers": ["gebrannt", "gebrennet", "gebrenten", "brennen"],
         "correct": "gebrannt"
     },
     {
         "question": "binden",
-        "answers": ["gebunden", "gebindet", "gebandet", "gebunden"],
+        "answers": ["gebunden", "gebindet", "gebandet", "gebundet"],
         "correct": "gebunden"
     },
     {
         "question": "heben",
-        "answers": ["gehoben", "gehoben", "gehäbt", "gehöben"],
+        "answers": ["gehoben", "geheben", "gehäbt", "gehöben"],
         "correct": "gehoben"
     },
     {
         "question": "lügen",
-        "answers": ["gelogen", "gelogen", "gelücht", "gelahen"],
+        "answers": ["gelogen", "gelogt", "gelücht", "gelahen"],
         "correct": "gelogen"
     },
     {
@@ -375,38 +350,28 @@
         "correct": "geschmissen"
     },
     {
-        "question": "sitzen",
-        "answers": ["gesessen", "gesitzt", "gesaßen", "gesitzt"],
-        "correct": "gesessen"
-    },
-    {
-        "question": "lügen",
-        "answers": ["gelogen", "gelücht", "gelöchen", "gelohgen"],
-        "correct": "gelogen"
-    },
-    {
         "question": "schieben",
         "answers": ["geschoben", "geschöbt", "geschiebt", "geschieben"],
         "correct": "geschoben"
     },
     {
         "question": "gleichen",
-        "answers": ["geglichen", "gegleicht", "geglichen", "geglichen"],
+        "answers": ["geglichen", "gegleicht", "geglochen", "geglochtet"],
         "correct": "geglichen"
     },
     {
         "question": "klingen",
-        "answers": ["geklungen", "geklingt", "geklängt", "geklungen"],
+        "answers": ["geklungen", "geklingt", "geklängt", "geklingen"],
         "correct": "geklungen"
     },
     {
         "question": "steigen",
-        "answers": ["gestiegen", "gesteigt", "gestiegen", "gesteig"],
+        "answers": ["gestiegen", "gesteigt", "gestogen", "gesteig"],
         "correct": "gestiegen"
     },
     {
         "question": "biegen",
-        "answers": ["gebogen", "gebiegt", "gebäugt", "gebogen"],
+        "answers": ["gebogen", "gebiegt", "gebäugt", "gebiegen"],
         "correct": "gebogen"
     },
     {
@@ -416,13 +381,8 @@
     },
     {
         "question": "werfen",
-        "answers": ["geworfen", "gewurfen", "gewarft", "geworfen"],
+        "answers": ["geworfen", "gewurfen", "gewarft", "gewerfen"],
         "correct": "geworfen"
-    },
-    {
-        "question": "ziehen",
-        "answers": ["gezogen", "gezohgen", "gezohen", "gezogen"],
-        "correct": "gezogen"
     },
     {
         "question": "schwören",
@@ -431,7 +391,7 @@
     },
     {
         "question": "laden",
-        "answers": ["geladen", "geladet", "gelädet", "geladen"],
+        "answers": ["geladen", "geladet", "gelädet", "laden"],
         "correct": "geladen"
     },
     {
@@ -466,18 +426,13 @@
     },
     {
         "question": "rennen",
-        "answers": ["gerannt", "gerennt", "gerunnt", "gerannt"],
+        "answers": ["gerannt", "gerennt", "gerunnt", "gerennen"],
         "correct": "gerannt"
     },
     {
         "question": "sterben",
         "answers": ["gestorben", "gestorbet", "gestorben", "gestorben"],
         "correct": "gestorben"
-    },
-    {
-        "question": "klingen",
-        "answers": ["geklungen", "geklingt", "geklungen", "geklungen"],
-        "correct": "geklungen"
     },
     {
         "question": "gleiten",
@@ -491,22 +446,22 @@
     },
     {
         "question": "schießen",
-        "answers": ["geschossen", "geschoss", "geschoßen", "geschossen"],
+        "answers": ["geschossen", "geschoss", "geschoßen", "geschosset"],
         "correct": "geschossen"
     },
     {
         "question": "saugen",
-        "answers": ["gesogen", "gesaugt", "gesogen", "gesugen"],
+        "answers": ["gesogen", "gesaugt", "gesaugen", "gesugen"],
         "correct": "gesogen"
     },
     {
         "question": "schaffen",
-        "answers": ["geschaffen", "geschaft", "geschafft", "geschaffen"],
+        "answers": ["geschaffen", "geschaft", "geschafft", "schaffen"],
         "correct": "geschaffen"
     },
     {
         "question": "halten",
-        "answers": ["gehalten", "gehalt", "gehalten", "gehalten"],
+        "answers": ["gehalten", "gehalt", "gehaltet", "geholten"],
         "correct": "gehalten"
     }
 ]

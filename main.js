@@ -38,13 +38,20 @@ function startQuiz() {
     startScreen.classList.add("hidden");
     quizContainer.classList.remove("hidden");
 
-    fetch('questions.json')
+    shuffledQuestions = shuffleArray(questions);
+    currentQuestionIndex = 0;
+    score = 0;
+    totalQuestions = 0;
+
+    loadQuestion();
+
+    /*fetch('questions.json')
         .then(response => response.json())
         .then(data => {
             shuffledQuestions = shuffleArray(data);
             loadQuestion();
         })
-        .catch(error => console.error('Erreur de chargement des questions :', error));
+        .catch(error => console.error('Erreur de chargement des questions :', error));*/
 }
 
 function loadQuestion() {
@@ -78,7 +85,7 @@ function checkAnswer(selectedAnswer) {
         resultElement.classList.remove("show-result");
         currentQuestionIndex = (currentQuestionIndex + 1) % shuffledQuestions.length;
         loadQuestion();
-    }, 1000);
+    }, 10000);
 }
 
 function endQuiz() {
