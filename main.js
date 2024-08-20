@@ -24,6 +24,7 @@ let totalQuestions = 0;
 const startScreen = document.getElementById("start-screen");
 const quizContainer = document.getElementById("quiz-container");
 const resultScreen = document.getElementById("result-screen");
+const loadingScreen = document.getElementById("loading-screen");
 
 const questionElement = document.getElementById("question");
 const answerButtons = document.querySelectorAll(".answer-btn");
@@ -36,7 +37,7 @@ document.getElementById("restart-btn").addEventListener("click", restartQuiz);
 
 function startQuiz() {
     startScreen.classList.add("hidden");
-    quizContainer.classList.remove("hidden");
+    loadingScreen.classList.remove("hidden");
 
     shuffledQuestions = shuffleArray(questions);
     currentQuestionIndex = 0;
@@ -45,13 +46,30 @@ function startQuiz() {
 
     // loadQuestion();
 
-    fetch('questions.json')
+    /*fetch('questions.json')
         .then(response => response.json())
         .then(data => {
             shuffledQuestions = shuffleArray(data);
             loadQuestion();
         })
-        .catch(error => console.error('Erreur de chargement des questions :', error));
+        .catch(error => console.error('Erreur de chargement des questions :', error));*/
+
+        fetch('questions.json')
+        .then(response => response.json())
+        .then(data => {
+            shuffledQuestions = shuffleArray(data);
+            currentQuestionIndex = 0;
+            score = 0;
+            totalQuestions = 0;
+
+            loadingScreen.classList.add("hidden"); // Cacher l'écran de chargement
+            quizContainer.classList.remove("hidden"); // Afficher le quiz
+            loadQuestion();
+        })
+        .catch(error => {
+            console.error('Erreur de chargement des questions :', error);
+            loadingScreen.innerHTML = '<h1>Erreur de chargement des questions</h1>';
+        });
 }
 
 function loadQuestion() {
