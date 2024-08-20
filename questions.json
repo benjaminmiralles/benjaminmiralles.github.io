@@ -1,0 +1,17 @@
+[
+    {
+        "question": "sprachen",
+        "answers": ["gesprochen", "gesprachen", "gespricht", "sprachen"],
+        "correct": "gesprochen"
+    },
+    {
+        "question": "machen",
+        "answers": ["gemacht", "gemachen", "machen", "gemochen"],
+        "correct": "gemacht"
+    },
+    {
+        "question": "trinken",
+        "answers": ["getrunken", "getrinken", "getrunkt", "getrankt"],
+        "correct": "getrunken"
+    }
+]
