@@ -137,7 +137,7 @@ body, html {
 
 #start-btn, #end-btn, #restart-btn {
     position: fixed;
-    bottom: 200px; /* Position à 20px du bas de l'écran */
+    bottom: 20%;
     left: 50%;
     transform: translateX(-50%); /* Centrer horizontalement */
     padding: 20px 40px;
