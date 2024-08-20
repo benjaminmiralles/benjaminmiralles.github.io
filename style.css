@@ -79,7 +79,7 @@ h1 {
     text-align: center;
     display: none;
     z-index: 100;
-    animation: explode 10.6s ease-out forwards;
+    animation: explode 0.6s ease-out forwards;
 }
 
 #final-score{

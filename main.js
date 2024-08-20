@@ -43,15 +43,15 @@ function startQuiz() {
     score = 0;
     totalQuestions = 0;
 
-    loadQuestion();
+    // loadQuestion();
 
-    /*fetch('questions.json')
+    fetch('questions.json')
         .then(response => response.json())
         .then(data => {
             shuffledQuestions = shuffleArray(data);
             loadQuestion();
         })
-        .catch(error => console.error('Erreur de chargement des questions :', error));*/
+        .catch(error => console.error('Erreur de chargement des questions :', error));
 }
 
 function loadQuestion() {
@@ -85,7 +85,7 @@ function checkAnswer(selectedAnswer) {
         resultElement.classList.remove("show-result");
         currentQuestionIndex = (currentQuestionIndex + 1) % shuffledQuestions.length;
         loadQuestion();
-    }, 10000);
+    }, 1000);
 }
 
 function endQuiz() {
