@@ -2,13 +2,14 @@
 body, html {
     margin: 0;
     padding: 0;
-    font-family: Arial, sans-serif;
     background-color: #f7f7f7;
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
     overflow: hidden;
+    font-family: 'Rajdhani', sans-serif;
+
 }
 
 .screen {
@@ -34,7 +35,8 @@ body, html {
 }
 
 h1 {
-    margin-bottom: 32px;
+    margin-bottom: 56px;
+    font-family: 'Press Start 2P', cursive;
 }
 
 #question-container {
@@ -58,6 +60,8 @@ h1 {
     font-size: 32px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-family: 'Rajdhani', sans-serif;
+
 }
 
 .answer-btn:hover {
@@ -78,6 +82,11 @@ h1 {
     display: none;
     z-index: 100;
     animation: explode 0.6s ease-out forwards;
+}
+
+#final-score{
+    margin-bottom: 64px;
+    font-size:32px;
 }
 
 .correct {
@@ -107,7 +116,7 @@ h1 {
 
 
 
-#end-btn, #restart-btn {
+#end-btn {
     margin-top: 20px;
     padding: 10px 20px;
     background-color: #dc3545;
@@ -117,15 +126,17 @@ h1 {
     font-size: 32px;
     cursor: pointer;
     transition: background-color 0.3s;
+    font-family: 'Press Start 2P', cursive;
+
 }
 
-#end-btn:hover, #restart-btn:hover {
+#end-btn:hover {
     background-color: #c82333;
 }
 
 
 /* Style du bouton start-btn */
-#start-btn {
+#start-btn, #restart-btn {
     padding: 15px 30px;
     background-color: #28a745;
     color: white;
@@ -135,15 +146,17 @@ h1 {
     cursor: pointer;
     transition: background-color 0.3s, transform 0.2s, box-shadow 0.3s;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    font-family: 'Press Start 2P', cursive;
+
 }
 
-#start-btn:hover {
+#start-btn:hover, #restart-btn {
     background-color: #218838;
     transform: translateY(-2px);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 }
 
-#start-btn:active {
+#start-btn:active, #restart-btn {
     transform: translateY(1px);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
