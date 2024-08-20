@@ -83,6 +83,8 @@ function loadQuestion() {
 }
 
 function checkAnswer(selectedAnswer) {
+    const chocolateEmoji = document.getElementById('chocolate-emoji');
+
     totalQuestions++;
     const currentQuestion = shuffledQuestions[currentQuestionIndex];
     if (selectedAnswer === currentQuestion.correct) {
@@ -92,6 +94,15 @@ function checkAnswer(selectedAnswer) {
     } else {
         resultElement.textContent = "Schade!";
         resultElement.className = "incorrect";
+
+        // Déclencher l'animation de l'emoji chocolat
+        chocolateEmoji.classList.add('slide-down');
+
+        // Réinitialiser l'emoji après l'animation
+        setTimeout(() => {
+            chocolateEmoji.classList.remove('slide-down');
+           // chocolateEmoji.style.top = '-100px'; // Remettre l'emoji en haut pour la prochaine animation
+        }, 1000);
     }
 
     resultElement.style.display = "block";
@@ -104,6 +115,7 @@ function checkAnswer(selectedAnswer) {
         loadQuestion();
     }, 1000);
 }
+
 
 function endQuiz() {
     quizContainer.classList.add("hidden");

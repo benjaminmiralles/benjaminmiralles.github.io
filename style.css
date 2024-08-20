@@ -61,12 +61,26 @@ body, html {
 }
 
 #question-container {
+    min-height: 120px;  /* Hauteur minimale */
+    max-height: 120px;  /* Hauteur maximale pour éviter les variations */
     margin-bottom: 20px;
-    font-size:36px;    
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 #answers-container {
     column-count: 2;
+    min-height: 200px;  /* Hauteur minimale */
+    max-height: 200px;  /* Hauteur maximale pour éviter les variations */
+    margin-bottom: 20px;
+    font-size: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
 }
 
 .answer-btn {
@@ -179,4 +193,19 @@ body, html {
 
 #loading-screen.hidden {
     display: none;
+}
+
+#chocolate-emoji {
+    position: fixed;
+    top: -100px; /* Commence hors de l'écran */
+    right: 20px; /* Place l'emoji à droite */
+    font-size: 50px; /* Taille de l'emoji */
+    z-index: 1000; /* Assurez-vous qu'il est au-dessus des autres éléments */
+    opacity: 0; /* Commence invisible */
+    transition: top 1s ease-in, opacity 1s ease-in;
+}
+
+#chocolate-emoji.slide-down {
+    top: 100vh; /* Fait glisser l'emoji jusqu'en bas */
+    opacity: 1; /* Rendre visible pendant le mouvement */
 }
