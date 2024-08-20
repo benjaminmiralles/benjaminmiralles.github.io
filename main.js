@@ -38,12 +38,13 @@ function startQuiz() {
     startScreen.classList.add("hidden");
     quizContainer.classList.remove("hidden");
 
-    shuffledQuestions = shuffleArray(questions);
-    currentQuestionIndex = 0;
-    score = 0;
-    totalQuestions = 0;
-
-    loadQuestion();
+    fetch('questions.json')
+        .then(response => response.json())
+        .then(data => {
+            shuffledQuestions = shuffleArray(data);
+            loadQuestion();
+        })
+        .catch(error => console.error('Erreur de chargement des questions :', error));
 }
 
 function loadQuestion() {
