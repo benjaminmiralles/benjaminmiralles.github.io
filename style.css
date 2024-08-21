@@ -155,7 +155,7 @@ body, html {
 
 #start-btn, #end-btn, #restart-btn {
     position: fixed;
-    bottom: 15%;
+    bottom: 13%;
     left: 50%;
     transform: translateX(-50%); /* Centrer horizontalement */
     padding: 20px 40px;
@@ -197,7 +197,7 @@ body, html {
 
 #chocolate-emoji {
     position: fixed;
-    top: 100px; /* Commence hors de l'écran */
+    top: 50px; /* Commence hors de l'écran */
     right: 20px; /* Place l'emoji à droite */
     font-size: 50px; /* Taille de l'emoji */
     z-index: 1000; /* Assurez-vous qu'il est au-dessus des autres éléments */
