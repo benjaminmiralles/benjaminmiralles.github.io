@@ -71,6 +71,7 @@ body, html {
     align-items: center;
     justify-content: center;
     text-align: center;
+    transform: translateY(-100%);
 }
 
 #answers-container {
