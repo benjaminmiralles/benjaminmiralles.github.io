@@ -17,42 +17,51 @@ let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
 
-// Modifiez votre fonction initModel dans main.js
 async function initModel() {
     try {
-        status.textContent = "Vérification WebGPU...";
-        
-        // Vérifier si WebGPU est supporté
+        // 1. Vérification explicite du support WebGPU
         if (!navigator.gpu) {
-            throw new Error("WebGPU n'est pas supporté sur ce navigateur/appareil.");
+            status.textContent = "WebGPU non supporté. Activez-le dans les réglages Safari.";
+            return;
         }
 
-        status.textContent = "Chargement du modèle (cela peut prendre 1-2 min)...";
-        recordBtn.disabled = true;
-        
         const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
         
-        processor = await VoxtralProcessor.from_pretrained(model_id);
+        // Configuration globale pour mobile
+        status.textContent = "Initialisation du processeur...";
         
+        processor = await VoxtralProcessor.from_pretrained(model_id);
+
+        status.textContent = "Téléchargement des poids (0%)...";
+
+        // 2. Chargement avec suivi de progression
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
-                // On essaie de rester léger mais compatible
-                embed_tokens: "fp32", // Parfois plus stable sur iPad que fp16
+                embed_tokens: "fp32", 
                 audio_encoder: "q4", 
                 decoder_model_merged: "q4",
             },
             device: "webgpu",
-            // Option cruciale : évite de saturer la RAM pendant le chargement
-            use_external_data_format: true, 
+            progress_callback: (data) => {
+                if (data.status === 'progress') {
+                    status.textContent = `Téléchargement : ${data.file} (${Math.round(data.loaded / 1024 / 1024)} Mo)`;
+                } else if (data.status === 'done') {
+                    status.textContent = `Fichier chargé : ${data.file}`;
+                }
+            }
         });
         
         status.textContent = "Modèle prêt ! Enregistrez un message.";
         recordBtn.disabled = false;
+        
     } catch (e) {
+        console.error("Erreur complète :", e);
         status.textContent = "Erreur : " + e.message;
-        console.error("Erreur détaillée:", e);
-        // Option de secours : proposer le CPU si WebGPU échoue
-        status.innerHTML += "<br><small>Note: Un iPad avec puce M1/M2 est fortement recommandé.</small>";
+        
+        // Diagnostic spécifique iPad
+        if (e.message.includes("out of memory") || e.message.includes("exhausted")) {
+            status.textContent = "Erreur : Mémoire RAM saturée. Fermez les autres onglets.";
+        }
     }
 }
 
