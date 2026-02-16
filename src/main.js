@@ -2,7 +2,8 @@ import {
     VoxtralForConditionalGeneration, 
     VoxtralProcessor, 
     TextStreamer 
-} from "@huggingface/transformers";
+} from "https://esm.sh/@huggingface/transformers";
+
 
 const status = document.getElementById('status');
 const recordStatus = document.getElementById('recordStatus');
