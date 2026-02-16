@@ -17,28 +17,42 @@ let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
 
+// Modifiez votre fonction initModel dans main.js
 async function initModel() {
     try {
-        status.textContent = "Chargement du modèle Voxtral (WebGPU)...";
-        recordBtn.disabled = true; // Désactivé pendant le chargement
+        status.textContent = "Vérification WebGPU...";
+        
+        // Vérifier si WebGPU est supporté
+        if (!navigator.gpu) {
+            throw new Error("WebGPU n'est pas supporté sur ce navigateur/appareil.");
+        }
+
+        status.textContent = "Chargement du modèle (cela peut prendre 1-2 min)...";
+        recordBtn.disabled = true;
         
         const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
         
         processor = await VoxtralProcessor.from_pretrained(model_id);
+        
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
-                embed_tokens: "fp16",
+                // On essaie de rester léger mais compatible
+                embed_tokens: "fp32", // Parfois plus stable sur iPad que fp16
                 audio_encoder: "q4", 
                 decoder_model_merged: "q4",
             },
             device: "webgpu",
+            // Option cruciale : évite de saturer la RAM pendant le chargement
+            use_external_data_format: true, 
         });
         
         status.textContent = "Modèle prêt ! Enregistrez un message.";
-        recordBtn.disabled = false; // On n'autorise l'enregistrement qu'une fois prêt
+        recordBtn.disabled = false;
     } catch (e) {
-        status.textContent = "Erreur de chargement : " + e.message;
-        console.error("Erreur initModel:", e);
+        status.textContent = "Erreur : " + e.message;
+        console.error("Erreur détaillée:", e);
+        // Option de secours : proposer le CPU si WebGPU échoue
+        status.innerHTML += "<br><small>Note: Un iPad avec puce M1/M2 est fortement recommandé.</small>";
     }
 }
 
