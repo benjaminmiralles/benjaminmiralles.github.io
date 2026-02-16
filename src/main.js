@@ -206,12 +206,11 @@ generateBtn.onclick = async () => {
     status.textContent = "Analyse de l'audio et génération...";
     generateBtn.disabled = true;
     output.textContent = "";
-
-    const overallStartTime = performance.now();
-    let firstTokenTime = null;
+	
+	// 1. Démarrer le chrono ICI (Dès le clic/début du traitement)
+    const overallStartTime = performance.now(); 
+    let firstTokenTime = null; // Pour calculer aussi la latence initiale si vous voulez
     let tokenCount = 0;
-
-    setProgress(8, 'Préparation de la transcription...');
 
     try {
         const conversation = [
@@ -219,42 +218,39 @@ generateBtn.onclick = async () => {
                 role: "user",
                 content: [
                     { type: "audio" },
-                    {
-                        type: "text",
-                        text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations. Sois très précis."
+                    { 
+                        type: "text", 
+                        text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations. Sois très précis." 
                     },
                 ],
             }
         ];
-
-        const promptText = processor.apply_chat_template(conversation, { tokenize: false });
-        setProgress(18, 'Encodage du prompt...');
-
-        const inputs = await processor(promptText, audioBuffer);
-        setProgress(30, 'Analyse de l\'audio...');
-
-        const onToken = (t) => {
-            if (firstTokenTime === null) {
-                firstTokenTime = performance.now();
-                const latency = ((firstTokenTime - overallStartTime) / 1000).toFixed(2);
-                console.log(`Latence initiale (encodage audio) : ${latency}s`);
-            }
-
-            tokenCount++;
-            output.textContent += t;
-
-            const generationDuration = (performance.now() - firstTokenTime) / 1000;
-            if (generationDuration > 0) {
-                const tps = (tokenCount / generationDuration).toFixed(2);
-                const estimatedProgress = Math.min(95, 35 + tokenCount * 2.5);
-                setProgress(estimatedProgress, `Génération : ${tps} tokens/sec`);
-            }
-        };
+        
+        const text = processor.apply_chat_template(conversation, { tokenize: false });
+        const inputs = await processor(text, audioBuffer);
 
         const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
             skip_prompt: true,
-            callback_function: onToken,
+            callback_function: (t) => {
+                if (firstTokenTime === null) {
+                    firstTokenTime = performance.now();
+                    const latency = ((firstTokenTime - overallStartTime) / 1000).toFixed(2);
+                    console.log(`Latence initiale (encodage audio) : ${latency}s`);
+                }
+                
+                tokenCount++;
+                output.textContent += t;
+
+                const now = performance.now();
+                // On calcule la vitesse sur la phase de génération pure
+                const generationDuration = (now - firstTokenTime) / 1000;
+                
+                if (generationDuration > 0) {
+                    const tps = (tokenCount / generationDuration).toFixed(2);
+                    status.textContent = `Génération : ${tps} tokens/sec`;
+                }
+            }
         });
 
         await model.generate({
@@ -263,21 +259,12 @@ generateBtn.onclick = async () => {
             streamer,
         });
 
-        if (!output.textContent.trim()) {
-            status.textContent = "Transcription terminée mais vide. Réessayez avec un enregistrement plus long.";
-            return;
-        }
-
-        const totalExecutionTime = ((performance.now() - overallStartTime) / 1000).toFixed(2);
-        setProgress(100, 'Finalisation...');
-        status.textContent = `Terminé en ${totalExecutionTime}s (Vitesse brute : ${(tokenCount / Number(totalExecutionTime || 1)).toFixed(2)} t/s)`;
-
-        addTranscriptToHistory(output.textContent, totalExecutionTime);
+		const totalExecutionTime = ((performance.now() - overallStartTime) / 1000).toFixed(2);
+        status.textContent = `Terminé en ${totalExecutionTime}s (Vitesse brute : ${(tokenCount / totalExecutionTime).toFixed(2)} t/s)`;
     } catch (error) {
         status.textContent = "Erreur génération : " + error.message;
         console.error(error);
     } finally {
-        setTimeout(hideProgress, 500);
         generateBtn.disabled = false;
     }
 };
