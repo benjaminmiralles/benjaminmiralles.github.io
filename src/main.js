@@ -1,131 +1,44 @@
-import {
-    VoxtralForConditionalGeneration,
-    VoxtralProcessor,
-    TextStreamer
-} from "@huggingface/transformers";
+import { 
+    VoxtralForConditionalGeneration, 
+    VoxtralProcessor, 
+    TextStreamer 
+} from "@huggingface/transformers"; 
 
 const status = document.getElementById('status');
 const recordStatus = document.getElementById('recordStatus');
 const output = document.getElementById('output');
 const generateBtn = document.getElementById('generate');
 const recordBtn = document.getElementById('recordBtn');
-const historyList = document.getElementById('historyList');
-const progressWrapper = document.getElementById('progressWrapper');
-const progressBar = document.getElementById('progressBar');
-const progressValue = document.getElementById('progressValue');
-const progressTrack = progressWrapper.querySelector('.progress-track');
 
-const HISTORY_STORAGE_KEY = 'voxtral-transcripts-history';
-
-let model = null;
+// On déclare les variables ici pour qu'elles soient globales au module
+let model = null; 
 let processor = null;
 let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
-let transcriptHistory = loadTranscriptHistory();
-let selectedTranscriptId = transcriptHistory[0]?.id ?? null;
-
-function loadTranscriptHistory() {
-    try {
-        const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-    } catch {
-        return [];
-    }
-}
-
-function saveTranscriptHistory() {
-    localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(transcriptHistory));
-}
-
-function renderHistory() {
-    historyList.innerHTML = '';
-
-    if (transcriptHistory.length === 0) {
-        historyList.innerHTML = '<p class="empty-history">Aucun transcript pour le moment.</p>';
-        return;
-    }
-
-    transcriptHistory.forEach((item, index) => {
-        const button = document.createElement('button');
-        button.className = `history-item ${item.id === selectedTranscriptId ? 'active' : ''}`;
-        button.type = 'button';
-
-        const date = new Date(item.createdAt).toLocaleString('fr-FR');
-
-        button.innerHTML = `
-            <span class="history-title">Transcript #${transcriptHistory.length - index}</span>
-            <span class="history-subtitle">${date} · ${item.duration}s</span>
-        `;
-
-        button.onclick = () => {
-            selectedTranscriptId = item.id;
-            output.textContent = item.text;
-            status.textContent = `Transcript chargé (${date})`;
-            renderHistory();
-        };
-
-        historyList.appendChild(button);
-    });
-}
-
-function addTranscriptToHistory(text, duration) {
-    if (!text || !text.trim()) {
-        return;
-    }
-
-    const entry = {
-        id: crypto.randomUUID(),
-        text: text.trim(),
-        duration,
-        createdAt: new Date().toISOString(),
-    };
-
-    transcriptHistory.unshift(entry);
-    selectedTranscriptId = entry.id;
-
-    saveTranscriptHistory();
-    renderHistory();
-}
-
-function setProgress(percent, label) {
-    const value = Math.max(0, Math.min(100, Math.round(percent)));
-    progressWrapper.classList.remove('hidden');
-    progressBar.style.width = `${value}%`;
-    progressValue.textContent = `${value}%`;
-    progressTrack.setAttribute('aria-valuenow', String(value));
-
-    if (label) {
-        status.textContent = label;
-    }
-}
-
-function hideProgress() {
-    progressWrapper.classList.add('hidden');
-    progressBar.style.width = '0%';
-    progressValue.textContent = '0%';
-    progressTrack.setAttribute('aria-valuenow', '0');
-}
 
 async function initModel() {
     try {
+        // 1. Vérification explicite du support WebGPU
         if (!navigator.gpu) {
             status.textContent = "WebGPU non supporté. Activez-le dans les réglages Safari.";
             return;
         }
 
         const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
-
+        
+        // Configuration globale pour mobile
         status.textContent = "Initialisation du processeur...";
+        
         processor = await VoxtralProcessor.from_pretrained(model_id);
 
         status.textContent = "Téléchargement des poids (0%)...";
 
+        // 2. Chargement avec suivi de progression
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
-                embed_tokens: "q4",
-                audio_encoder: "q4f16",
+                embed_tokens: "q4", 
+                audio_encoder: "q4f16", 
                 decoder_model_merged: "q4f16",
             },
             device: "webgpu",
@@ -137,22 +50,23 @@ async function initModel() {
                 }
             }
         });
-
+        
         status.textContent = "Modèle prêt ! Enregistrez un message.";
         recordBtn.disabled = false;
-
+        
     } catch (e) {
         console.error("Erreur complète :", e);
         status.textContent = "Erreur : " + e.message;
-
+        
+        // Diagnostic spécifique iPad
         if (e.message.includes("out of memory") || e.message.includes("exhausted")) {
             status.textContent = "Erreur : Mémoire RAM saturée. Fermez les autres onglets.";
         }
     }
 }
 
+// Lancer l'initialisation immédiatement
 initModel();
-renderHistory();
 
 recordBtn.onclick = async () => {
     if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -168,15 +82,16 @@ recordBtn.onclick = async () => {
         audioChunks = [];
 
         mediaRecorder.ondataavailable = (e) => audioChunks.push(e.data);
-
+        
         mediaRecorder.onstop = async () => {
             const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
             const arrayBuffer = await audioBlob.arrayBuffer();
             const audioContext = new AudioContext({ sampleRate: 16000 });
             const decoded = await audioContext.decodeAudioData(arrayBuffer);
-
+            
             audioBuffer = decoded.getChannelData(0);
-
+            
+            // On n'active le bouton QUE si le modèle est bien chargé
             if (model) {
                 generateBtn.disabled = false;
                 status.textContent = "Audio prêt. Cliquez sur Lancer.";
