@@ -38,8 +38,8 @@ async function initModel() {
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "fp32", 
-                audio_encoder: "q4", 
-                decoder_model_merged: "q4",
+                audio_encoder: "q4f16", 
+                decoder_model_merged: "q4f16",
             },
             device: "webgpu",
             progress_callback: (data) => {
@@ -109,7 +109,6 @@ recordBtn.onclick = async () => {
 };
 
 generateBtn.onclick = async () => {
-    // Vérification de sécurité supplémentaire
     if (!model || !processor) {
         status.textContent = "Erreur : Le modèle n'est pas encore chargé.";
         return;
@@ -119,42 +118,63 @@ generateBtn.onclick = async () => {
         return;
     }
 
-    status.textContent = "Transcription en cours...";
+    status.textContent = "Analyse de l'audio et génération...";
     generateBtn.disabled = true;
     output.textContent = "";
 
     try {
-		const conversation = [
-			{
-				role: "user",
-				content: [
-					{ type: "audio" },
-					{ 
-						type: "text", 
-						text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations (euh, ah). Sois très précis sur les termes techniques." 
-					},
-				],
-			}
-		];
+        const conversation = [
+            {
+                role: "user",
+                content: [
+                    { type: "audio" },
+                    { 
+                        type: "text", 
+                        text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations. Sois très précis." 
+                    },
+                ],
+            }
+        ];
+        
         const text = processor.apply_chat_template(conversation, { tokenize: false });
         const inputs = await processor(text, audioBuffer);
+
+        // --- AJOUT POUR LES STATISTIQUES ---
+        let startTime = null;
+        let tokenCount = 0;
+        const statsDisplay = document.getElementById('status'); 
+        // -----------------------------------
 
         const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
             skip_prompt: true,
             callback_function: (t) => {
+                // On démarre le chrono au premier token reçu
+                if (startTime === null) startTime = performance.now();
+                
+                tokenCount++;
                 output.textContent += t;
+
+                // Calcul de la vitesse
+                const now = performance.now();
+                const durationInSeconds = (now - startTime) / 1000;
+                
+                if (durationInSeconds > 0) {
+                    const tps = (tokenCount / durationInSeconds).toFixed(2);
+                    statsDisplay.textContent = `Transcription en cours : ${tps} tokens/sec`;
+                }
             }
         });
 
-        // Ici, 'model' est maintenant garanti d'exister
         await model.generate({
             ...inputs,
             max_new_tokens: 256,
             streamer,
         });
 
-        status.textContent = "Terminé !";
+        const totalTime = ((performance.now() - startTime) / 1000).toFixed(2);
+        status.textContent = `Terminé en ${totalTime}s (${(tokenCount / totalTime).toFixed(2)} tokens/sec)`;
+
     } catch (error) {
         status.textContent = "Erreur génération : " + error.message;
         console.error(error);
