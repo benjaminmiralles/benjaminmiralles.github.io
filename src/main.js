@@ -151,6 +151,29 @@ async function initModel() {
     }
 }
 
+function extractTextFromGenerationResult(generationResult, promptText) {
+    try {
+        const rawSequences = generationResult?.sequences ?? generationResult;
+        if (!rawSequences) {
+            return '';
+        }
+
+        const decoded = processor.tokenizer.batch_decode(rawSequences, {
+            skip_special_tokens: true,
+        });
+
+        const first = decoded?.[0] ?? '';
+        if (!first) {
+            return '';
+        }
+
+        return first.replace(promptText, '').trim();
+    } catch (error) {
+        console.warn('Impossible de décoder la génération en fallback:', error);
+        return '';
+    }
+}
+
 initModel();
 renderHistory();
 
@@ -213,6 +236,8 @@ generateBtn.onclick = async () => {
 
     setProgress(8, 'Préparation de la transcription...');
 
+    setProgress(8, 'Préparation de la transcription...');
+
     try {
         const conversation = [
             {
@@ -256,16 +281,27 @@ generateBtn.onclick = async () => {
             skip_special_tokens: true,
             skip_prompt: true,
             callback_function: onToken,
+            callbackFunction: onToken,
         });
 
-        await model.generate({
+        const generationResult = await model.generate({
             ...inputs,
             max_new_tokens: 256,
             streamer,
+            return_dict_in_generate: true,
         });
 
         if (!streamedText.trim()) {
             status.textContent = "Transcription terminée mais vide. Réessayez avec un enregistrement plus long.";
+            const fallbackText = extractTextFromGenerationResult(generationResult, promptText);
+            if (fallbackText) {
+                streamedText = fallbackText;
+                output.textContent = streamedText;
+            }
+        }
+
+        if (!streamedText.trim()) {
+            status.textContent = 'Transcription terminée mais vide. Réessayez avec un enregistrement plus long.';
             return;
         }
 
