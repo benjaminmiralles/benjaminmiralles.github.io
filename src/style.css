@@ -1,96 +1,195 @@
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
+  color: #1f2937;
+  background-color: #f3f4f6;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+* {
+  box-sizing: border-box;
 }
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-#app {
-  max-width: 1280px;
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  max-width: 1200px;
+  min-height: 100vh;
   margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  background: #ffffff;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.08);
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.vanilla:hover {
-  filter: drop-shadow(0 0 2em #f7df1eaa);
+.sidebar {
+  border-right: 1px solid #e5e7eb;
+  padding: 1.25rem;
+  background: #fafafa;
 }
 
-.card {
-  padding: 2em;
+.sidebar h2 {
+  margin-top: 0;
+  margin-bottom: 0.25rem;
+  font-size: 1.1rem;
 }
 
-.read-the-docs {
-  color: #888;
+.sidebar-help {
+  margin: 0 0 1rem;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: calc(100vh - 140px);
+  overflow-y: auto;
+}
+
+.history-item {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  border-radius: 8px;
+  text-align: left;
+  padding: 0.65rem;
+  cursor: pointer;
+}
+
+.history-item:hover {
+  border-color: #6366f1;
+}
+
+.history-item.active {
+  border-color: #4f46e5;
+  background: #eef2ff;
+}
+
+.history-title {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.2rem;
+}
+
+.history-subtitle {
+  display: block;
+  font-size: 0.8rem;
+  color: #6b7280;
+}
+
+.empty-history {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.content {
+  padding: 1.5rem;
+}
+
+.content h1 {
+  margin-top: 0;
+  font-size: 1.6rem;
+}
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 0.8rem;
+}
+
+#output {
+  white-space: pre-wrap;
+  background: #f9fafb;
+  padding: 15px;
+  border-radius: 8px;
+  min-height: 180px;
+  border: 1px solid #e5e7eb;
+}
+
+.recording {
+  color: #dc2626;
+  font-weight: 700;
+  animation: blink 1s infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
 }
 
 button {
+  border: 1px solid #d1d5db;
   border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+  font-weight: 600;
+  background: #ffffff;
+  color: #111827;
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+button:hover {
+  border-color: #6366f1;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.progress-wrapper {
+  margin: 0.8rem 0 1rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.progress-meta {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.35rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+.progress-track {
+  width: 100%;
+  height: 10px;
+  border-radius: 9999px;
+  background: #e5e7eb;
+  overflow: hidden;
+}
+
+.progress-bar {
+  width: 0%;
+  height: 100%;
+  background: linear-gradient(90deg, #4f46e5, #6366f1);
+  transition: width 0.2s ease;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
   }
-  a:hover {
-    color: #747bff;
+
+  .sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e5e7eb;
   }
-  button {
-    background-color: #f9f9f9;
+
+  .history-list {
+    max-height: 220px;
   }
 }
