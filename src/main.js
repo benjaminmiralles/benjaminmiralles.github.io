@@ -236,6 +236,8 @@ generateBtn.onclick = async () => {
 
     setProgress(8, 'Préparation de la transcription...');
 
+    setProgress(8, 'Préparation de la transcription...');
+
     try {
         const conversation = [
             {
