@@ -292,6 +292,7 @@ generateBtn.onclick = async () => {
         });
 
         if (!streamedText.trim()) {
+            status.textContent = "Transcription terminée mais vide. Réessayez avec un enregistrement plus long.";
             const fallbackText = extractTextFromGenerationResult(generationResult, promptText);
             if (fallbackText) {
                 streamedText = fallbackText;
