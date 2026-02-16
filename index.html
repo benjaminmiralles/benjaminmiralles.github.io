@@ -1,51 +1,44 @@
 <!doctype html>
 <html lang="fr">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Voxtral WebGPU - Micro</title>
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <link rel="stylesheet" href="/src/style.css" />
-    <script type="importmap">
-      {
-        "imports": {
-          "@huggingface/transformers": "https://esm.sh/@huggingface/transformers"
-        }
-      }
-    </script>
-    <script type="module" src="/src/main.js"></script>
-  </head>
+	 <head>
+	  <meta charset="UTF-8" />
+	  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	  <title>Voxtral WebGPU - Micro</title>
+	  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+	<script type="importmap">
+	  {
+		"imports": {
+		  "@huggingface/transformers": "https://esm.sh/@huggingface/transformers"
+		}
+	  }
+	</script>
+<script type="module" src="src/main.js"></script>
+
+
+	  <style>
+		body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
+		#app { display: flex; flex-direction: column; gap: 10px; }
+		#output { white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 8px; min-height: 50px; border: 1px solid #ddd; }
+		.recording { color: red; font-weight: bold; animation: blink 1s infinite; }
+		@keyframes blink { 50% { opacity: 0; } }
+		button { padding: 10px; cursor: pointer; }
+		button:disabled { cursor: not-allowed; opacity: 0.6; }
+	  </style>
+	</head>
   <body>
-    <div id="app" class="layout">
-      <aside class="sidebar">
-        <h2>Historique</h2>
-        <p class="sidebar-help">Cliquez sur un transcript pour le revoir.</p>
-        <div id="historyList" class="history-list"></div>
-      </aside>
+    <div id="app">
+      <h1>Voxtral WebGPU - Transcription Micro</h1>
+      
+      <div style="display: flex; gap: 10px;">
+        <button id="recordBtn">Démarrer l'enregistrement</button>
+        <button id="generate" disabled>Lancer la transcription</button>
+      </div>
 
-      <main class="content">
-        <h1>Voxtral WebGPU - Transcription Micro</h1>
-
-        <div class="controls">
-          <button id="recordBtn">Démarrer l'enregistrement</button>
-          <button id="generate" disabled>Lancer la transcription</button>
-        </div>
-
-        <p id="status">En attente du modèle...</p>
-        <div id="recordStatus"></div>
-
-        <div id="progressWrapper" class="progress-wrapper hidden" aria-live="polite">
-          <div class="progress-meta">
-            <span>Transcription en cours...</span>
-            <span id="progressValue">0%</span>
-          </div>
-          <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
-            <div id="progressBar" class="progress-bar"></div>
-          </div>
-        </div>
-
-        <pre id="output"></pre>
-      </main>
+      <p id="status">En attente du modèle...</p>
+      <div id="recordStatus"></div>
+      
+      <pre id="output"></pre>
     </div>
+    <script type="module" src="src/main.js"></script>
   </body>
 </html>
