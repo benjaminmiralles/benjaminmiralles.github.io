@@ -71,9 +71,13 @@ function renderHistory() {
 }
 
 function addTranscriptToHistory(text, duration) {
+    if (!text || !text.trim()) {
+        return;
+    }
+
     const entry = {
         id: crypto.randomUUID(),
-        text,
+        text: text.trim(),
         duration,
         createdAt: new Date().toISOString(),
     };
@@ -147,6 +151,29 @@ async function initModel() {
     }
 }
 
+function extractTextFromGenerationResult(generationResult, promptText) {
+    try {
+        const rawSequences = generationResult?.sequences ?? generationResult;
+        if (!rawSequences) {
+            return '';
+        }
+
+        const decoded = processor.tokenizer.batch_decode(rawSequences, {
+            skip_special_tokens: true,
+        });
+
+        const first = decoded?.[0] ?? '';
+        if (!first) {
+            return '';
+        }
+
+        return first.replace(promptText, '').trim();
+    } catch (error) {
+        console.warn('Impossible de décoder la génération en fallback:', error);
+        return '';
+    }
+}
+
 initModel();
 renderHistory();
 
@@ -205,6 +232,9 @@ generateBtn.onclick = async () => {
     const overallStartTime = performance.now();
     let firstTokenTime = null;
     let tokenCount = 0;
+    let streamedText = '';
+
+    setProgress(8, 'Préparation de la transcription...');
 
     setProgress(8, 'Préparation de la transcription...');
 
@@ -222,47 +252,63 @@ generateBtn.onclick = async () => {
             }
         ];
 
-        const text = processor.apply_chat_template(conversation, { tokenize: false });
+        const promptText = processor.apply_chat_template(conversation, { tokenize: false });
         setProgress(18, 'Encodage du prompt...');
 
-        const inputs = await processor(text, audioBuffer);
+        const inputs = await processor(promptText, audioBuffer);
         setProgress(30, 'Analyse de l\'audio...');
+
+        const onToken = (t) => {
+            if (firstTokenTime === null) {
+                firstTokenTime = performance.now();
+                const latency = ((firstTokenTime - overallStartTime) / 1000).toFixed(2);
+                console.log(`Latence initiale (encodage audio) : ${latency}s`);
+            }
+
+            tokenCount++;
+            streamedText += t;
+            output.textContent = streamedText;
+
+            const generationDuration = (performance.now() - firstTokenTime) / 1000;
+            if (generationDuration > 0) {
+                const tps = (tokenCount / generationDuration).toFixed(2);
+                const estimatedProgress = Math.min(95, 35 + tokenCount * 2.5);
+                setProgress(estimatedProgress, `Génération : ${tps} tokens/sec`);
+            }
+        };
 
         const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
             skip_prompt: true,
-            callback_function: (t) => {
-                if (firstTokenTime === null) {
-                    firstTokenTime = performance.now();
-                    const latency = ((firstTokenTime - overallStartTime) / 1000).toFixed(2);
-                    console.log(`Latence initiale (encodage audio) : ${latency}s`);
-                }
-
-                tokenCount++;
-                output.textContent += t;
-
-                const now = performance.now();
-                const generationDuration = (now - firstTokenTime) / 1000;
-
-                if (generationDuration > 0) {
-                    const tps = (tokenCount / generationDuration).toFixed(2);
-                    const estimatedProgress = Math.min(95, 35 + tokenCount * 2.5);
-                    setProgress(estimatedProgress, `Génération : ${tps} tokens/sec`);
-                }
-            }
+            callback_function: onToken,
+            callbackFunction: onToken,
         });
 
-        await model.generate({
+        const generationResult = await model.generate({
             ...inputs,
             max_new_tokens: 256,
             streamer,
+            return_dict_in_generate: true,
         });
+
+        if (!streamedText.trim()) {
+            const fallbackText = extractTextFromGenerationResult(generationResult, promptText);
+            if (fallbackText) {
+                streamedText = fallbackText;
+                output.textContent = streamedText;
+            }
+        }
+
+        if (!streamedText.trim()) {
+            status.textContent = 'Transcription terminée mais vide. Réessayez avec un enregistrement plus long.';
+            return;
+        }
 
         const totalExecutionTime = ((performance.now() - overallStartTime) / 1000).toFixed(2);
         setProgress(100, 'Finalisation...');
-        status.textContent = `Terminé en ${totalExecutionTime}s (Vitesse brute : ${(tokenCount / totalExecutionTime).toFixed(2)} t/s)`;
+        status.textContent = `Terminé en ${totalExecutionTime}s (Vitesse brute : ${(tokenCount / Number(totalExecutionTime || 1)).toFixed(2)} t/s)`;
 
-        addTranscriptToHistory(output.textContent.trim(), totalExecutionTime);
+        addTranscriptToHistory(streamedText, totalExecutionTime);
     } catch (error) {
         status.textContent = "Erreur génération : " + error.message;
         console.error(error);
