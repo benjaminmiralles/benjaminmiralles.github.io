@@ -37,7 +37,7 @@ async function initModel() {
         // 2. Chargement avec suivi de progression
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
-                embed_tokens: "fp32", 
+                embed_tokens: "q4", 
                 audio_encoder: "q4f16", 
                 decoder_model_merged: "q4f16",
             },
