@@ -1,7 +1,8 @@
 import { 
     VoxtralForConditionalGeneration, 
     VoxtralProcessor, 
-    TextStreamer 
+    TextStreamer,
+	read_audio
 } from "@huggingface/transformers"; 
 
 const status = document.getElementById('status');
