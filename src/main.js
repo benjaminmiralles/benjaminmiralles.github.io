@@ -97,6 +97,7 @@ recordBtn.onclick = async () => {
                 generateBtn.disabled = false;
                 status.textContent = "Audio prêt. Cliquez sur Lancer.";
             } else {
+                generateBtn.disabled = false;
                 status.textContent = "Audio prêt, mais le modèle charge encore...";
             }
         };
