@@ -1,9 +1,8 @@
 import { 
     VoxtralForConditionalGeneration, 
     VoxtralProcessor, 
-    TextStreamer,
-	read_audio
-} from "@huggingface/transformers"; 
+    TextStreamer 
+} from "@huggingface/transformers";
 
 const status = document.getElementById('status');
 const recordStatus = document.getElementById('recordStatus');
@@ -20,49 +19,26 @@ let audioBuffer = null;
 
 async function initModel() {
     try {
-        // 1. Vérification explicite du support WebGPU
-        if (!navigator.gpu) {
-            status.textContent = "WebGPU non supporté. Activez-le dans les réglages Safari.";
-            return;
-        }
-
+        status.textContent = "Chargement du modèle Voxtral (WebGPU)...";
+        recordBtn.disabled = true; // Désactivé pendant le chargement
+        
         const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
         
-        // Configuration globale pour mobile
-        status.textContent = "Initialisation du processeur...";
-        
-        const processor = await VoxtralProcessor.from_pretrained(model_id);
-
-        status.textContent = "Téléchargement des poids (0%)...";
-
-        // 2. Chargement avec suivi de progression
-        const model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
+        processor = await VoxtralProcessor.from_pretrained(model_id);
+        model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
-                embed_tokens: "fp32", // Parfois plus stable sur iPad que fp16
+                embed_tokens: "fp16",
                 audio_encoder: "q4", 
                 decoder_model_merged: "q4",
             },
             device: "webgpu",
-            progress_callback: (data) => {
-                if (data.status === 'progress') {
-                    status.textContent = `Téléchargement : ${data.file} (${Math.round(data.loaded / 1024 / 1024)} Mo)`;
-                } else if (data.status === 'done') {
-                    status.textContent = `Fichier chargé : ${data.file}`;
-                }
-            }
         });
         
         status.textContent = "Modèle prêt ! Enregistrez un message.";
-        recordBtn.disabled = false;
-        
+        recordBtn.disabled = false; // On n'autorise l'enregistrement qu'une fois prêt
     } catch (e) {
-        console.error("Erreur complète :", e);
-        status.textContent = "Erreur : " + e.message;
-        
-        // Diagnostic spécifique iPad
-        if (e.message.includes("out of memory") || e.message.includes("exhausted")) {
-            status.textContent = "Erreur : Mémoire RAM saturée. Fermez les autres onglets.";
-        }
+        status.textContent = "Erreur de chargement : " + e.message;
+        console.error("Erreur initModel:", e);
     }
 }
 
@@ -97,7 +73,6 @@ recordBtn.onclick = async () => {
                 generateBtn.disabled = false;
                 status.textContent = "Audio prêt. Cliquez sur Lancer.";
             } else {
-                generateBtn.disabled = false;
                 status.textContent = "Audio prêt, mais le modèle charge encore...";
             }
         };
@@ -111,35 +86,33 @@ recordBtn.onclick = async () => {
 };
 
 generateBtn.onclick = async () => {
-   // if (!model || !processor) {
-     //   status.textContent = "Erreur : Le modèle n'est pas encore chargé.";
-       // return;
-   // }
+    // Vérification de sécurité supplémentaire
+    if (!model || !processor) {
+        status.textContent = "Erreur : Le modèle n'est pas encore chargé.";
+        return;
+    }
     if (!audioBuffer) {
         status.textContent = "Erreur : Aucun audio enregistré.";
         return;
     }
 
-    status.textContent = "Analyse de l'audio et génération...";
+    status.textContent = "Transcription en cours...";
     generateBtn.disabled = true;
     output.textContent = "";
-	
-	// 1. Démarrer le chrono ICI (Dès le clic/début du traitement)
-    const overallStartTime = performance.now(); 
-    let firstTokenTime = null; // Pour calculer aussi la latence initiale si vous voulez
-    let tokenCount = 0;
 
     try {
-        const conversation = [
-            {
-                role: "user",
-                "content": [
-					{ "type": "audio" },
-					{ "type": "text", "text": "lang:en [TRANSCRIBE]" },
+		const conversation = [
+			{
+				role: "user",
+				content: [
+					{ type: "audio" },
+					{ 
+						type: "text", 
+						text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations (euh, ah). Sois très précis sur les termes techniques." 
+					},
 				],
-            }
-        ];
-        
+			}
+		];
         const text = processor.apply_chat_template(conversation, { tokenize: false });
         const inputs = await processor(text, audioBuffer);
 
@@ -147,34 +120,18 @@ generateBtn.onclick = async () => {
             skip_special_tokens: true,
             skip_prompt: true,
             callback_function: (t) => {
-                if (firstTokenTime === null) {
-                    firstTokenTime = performance.now();
-                    const latency = ((firstTokenTime - overallStartTime) / 1000).toFixed(2);
-                    console.log(`Latence initiale (encodage audio) : ${latency}s`);
-                }
-                
-                tokenCount++;
                 output.textContent += t;
-
-                const now = performance.now();
-                // On calcule la vitesse sur la phase de génération pure
-                const generationDuration = (now - firstTokenTime) / 1000;
-                
-                if (generationDuration > 0) {
-                    const tps = (tokenCount / generationDuration).toFixed(2);
-                    status.textContent = `Génération : ${tps} tokens/sec`;
-                }
             }
         });
 
+        // Ici, 'model' est maintenant garanti d'exister
         await model.generate({
             ...inputs,
             max_new_tokens: 256,
             streamer,
         });
 
-		const totalExecutionTime = ((performance.now() - overallStartTime) / 1000).toFixed(2);
-        status.textContent = `Terminé en ${totalExecutionTime}s (Vitesse brute : ${(tokenCount / totalExecutionTime).toFixed(2)} t/s)`;
+        status.textContent = "Terminé !";
     } catch (error) {
         status.textContent = "Erreur génération : " + error.message;
         console.error(error);
