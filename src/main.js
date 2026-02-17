@@ -38,9 +38,9 @@ async function initModel() {
         // 2. Chargement avec suivi de progression
         const model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
-                embed_tokens: "q4", 
-                audio_encoder: "q4f16", 
-                decoder_model_merged: "q4f16",
+                embed_tokens: "fp32", // Parfois plus stable sur iPad que fp16
+                audio_encoder: "q4", 
+                decoder_model_merged: "q4",
             },
             device: "webgpu",
             progress_callback: (data) => {
