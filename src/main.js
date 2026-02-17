@@ -131,13 +131,10 @@ generateBtn.onclick = async () => {
         const conversation = [
             {
                 role: "user",
-                content: [
-                    { type: "audio" },
-                    { 
-                        type: "text", 
-                        text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations. Sois très précis." 
-                    },
-                ],
+                "content": [
+					{ "type": "audio" },
+					{ "type": "text", "text": "lang:en [TRANSCRIBE]" },
+				],
             }
         ];
         
