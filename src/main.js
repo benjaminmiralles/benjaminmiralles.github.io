@@ -111,10 +111,10 @@ recordBtn.onclick = async () => {
 };
 
 generateBtn.onclick = async () => {
-    if (!model || !processor) {
-        status.textContent = "Erreur : Le modèle n'est pas encore chargé.";
-        return;
-    }
+   // if (!model || !processor) {
+     //   status.textContent = "Erreur : Le modèle n'est pas encore chargé.";
+       // return;
+   // }
     if (!audioBuffer) {
         status.textContent = "Erreur : Aucun audio enregistré.";
         return;
