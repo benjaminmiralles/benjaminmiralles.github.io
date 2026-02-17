@@ -31,12 +31,12 @@ async function initModel() {
         // Configuration globale pour mobile
         status.textContent = "Initialisation du processeur...";
         
-        processor = await VoxtralProcessor.from_pretrained(model_id);
+        const processor = await VoxtralProcessor.from_pretrained(model_id);
 
         status.textContent = "Téléchargement des poids (0%)...";
 
         // 2. Chargement avec suivi de progression
-        model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
+        const model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "q4", 
                 audio_encoder: "q4f16", 
