@@ -26,19 +26,31 @@ async function initModel() {
             return;
         }
 
-		const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
-		const processor = await VoxtralProcessor.from_pretrained(model_id);
-		const model = await VoxtralForConditionalGeneration.from_pretrained(
-			model_id,
-			{
-				dtype: {
-					embed_tokens: "fp16", // "fp32", "fp16", "q8", "q4"
-					audio_encoder: "q4", // "fp32", "fp16", "q8", "q4", "q4f16"
-					decoder_model_merged: "q4", // "q4", "q4f16"
-				},
-				device: "webgpu",
-			},
-		);
+        const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
+        
+        // Configuration globale pour mobile
+        status.textContent = "Initialisation du processeur...";
+        
+        const processor = await VoxtralProcessor.from_pretrained(model_id);
+
+        status.textContent = "Téléchargement des poids (0%)...";
+
+        // 2. Chargement avec suivi de progression
+        const model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
+            dtype: {
+                embed_tokens: "fp32", // Parfois plus stable sur iPad que fp16
+                audio_encoder: "q4", 
+                decoder_model_merged: "q4",
+            },
+            device: "webgpu",
+            progress_callback: (data) => {
+                if (data.status === 'progress') {
+                    status.textContent = `Téléchargement : ${data.file} (${Math.round(data.loaded / 1024 / 1024)} Mo)`;
+                } else if (data.status === 'done') {
+                    status.textContent = `Fichier chargé : ${data.file}`;
+                }
+            }
+        });
         
         status.textContent = "Modèle prêt ! Enregistrez un message.";
         recordBtn.disabled = false;
