@@ -5,38 +5,42 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Voxtral WebGPU - Micro</title>
-    <style>
-      body { font-family: sans-serif; max-width: 800px; margin: 20px auto; padding: 0 20px; }
-      #app { display: flex; flex-direction: column; gap: 10px; }
-      #output { white-space: pre-wrap; background: #f4f4f4; padding: 15px; border-radius: 8px; min-height: 50px; border: 1px solid #ddd; }
-      .recording { color: red; font-weight: bold; animation: blink 1s infinite; }
-      @keyframes blink { 50% { opacity: 0; } }
-      button { padding: 10px; cursor: pointer; }
-      button:disabled { cursor: not-allowed; opacity: 0.6; }
-    </style>
-	<script type="importmap">
-	  {
-		"imports": {
-		  "@huggingface/transformers": "https://esm.sh/@huggingface/transformers"
-		}
-	  }
-	</script>
-	    <script type="module" src="src/main.js"></script>
-
+    <link rel="stylesheet" href="src/style.css" />
+    <script type="module" src="src/main.js"></script>
   </head>
   <body>
-    <div id="app">
-      <h1>Voxtral WebGPU - Transcription Micro</h1>
-      
-      <div style="display: flex; gap: 10px;">
-        <button id="recordBtn">Démarrer l'enregistrement</button>
-        <button id="generate" disabled>Lancer la transcription</button>
-      </div>
+    <div class="layout">
+      <aside class="sidebar">
+        <h2>Historique</h2>
+        <p class="sidebar-help">Retrouvez les transcriptions déjà réalisées.</p>
+        <div id="historyList" class="history-list">
+          <p id="emptyHistory" class="empty-history">Aucune transcription pour le moment.</p>
+        </div>
+      </aside>
 
-      <p id="status">En attente du modèle...</p>
-      <div id="recordStatus"></div>
-      
-      <pre id="output"></pre>
+      <main class="content" id="app">
+        <h1>Voxtral WebGPU - Transcription Micro</h1>
+
+        <div class="controls">
+          <button id="recordBtn">Démarrer l'enregistrement</button>
+          <button id="generate" disabled>Lancer la transcription</button>
+        </div>
+
+        <div id="loadingProgress" class="progress-wrapper">
+          <div class="progress-meta">
+            <span id="progressLabel">Téléchargement des fichiers du modèle...</span>
+            <span id="progressText">0 / 3</span>
+          </div>
+          <div class="progress-track">
+            <div id="progressBar" class="progress-bar"></div>
+          </div>
+        </div>
+
+        <p id="status">En attente du modèle...</p>
+        <div id="recordStatus"></div>
+
+        <pre id="output"></pre>
+      </main>
     </div>
   </body>
 </html>
