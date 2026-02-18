@@ -28,7 +28,7 @@ let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
 
-const DEFAULT_SUMMARY_PROMPT = "Agis comme un assistant expert en rédaction de comptes-rendus. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :";
+const DEFAULT_SUMMARY_PROMPT = "Résume ma transcription. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :";
 
 if (summaryPromptInput) {
     summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
