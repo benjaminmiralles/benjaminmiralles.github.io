@@ -381,5 +381,38 @@ generateBtn.onclick = async () => {
 };
 
 summarizeBtn.onclick = () => {
-    // Logique de résumé volontairement non implémentée.
-};
+  try {
+        conversation2 = [
+			{
+				"role": "user",
+				"content": [
+					{
+						"type": "text",
+						"text": "Fais-moi un résumé du transcript que tu as réalisé :",
+					},
+				],
+			}
+		]
+        const text2 = processor.apply_chat_template(conversation2, { tokenize: false });
+        const inputs2 = await processor(text2);
+
+        const streamer2 = new TextStreamer(processor.tokenizer, {
+            skip_special_tokens: true,
+            skip_prompt: true,
+            callback_function: (t) => {
+                summaryOutput.textContent += t;
+            }
+        });
+
+        await model.generate({
+            ...inputs2,
+            max_new_tokens: 256,
+            streamer,
+        });
+		
+    } catch (error) {
+        recordStatus.textContent = "Erreur génération : " + error.message;
+        console.error(error);
+    } finally {
+        generateBtn.disabled = false;
+    }};
