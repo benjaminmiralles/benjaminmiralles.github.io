@@ -13,6 +13,8 @@ const progressContainer = document.getElementById('loadingProgress');
 const progressLabel = document.getElementById('progressLabel');
 const progressText = document.getElementById('progressText');
 const progressBar = document.getElementById('progressBar');
+const progressFiles = document.getElementById('progressFiles');
+const throughputInfo = document.getElementById('throughputInfo');
 const historyList = document.getElementById('historyList');
 const emptyHistory = document.getElementById('emptyHistory');
 
@@ -22,14 +24,73 @@ let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
 
-const MAX_MODEL_FILES = 3;
-const downloadedFiles = new Map();
+const MODEL_FILES_TO_TRACK = [
+    'embed_tokens_fp16.onnx_data',
+    'audio_encoder_q4f16.onnx_data',
+    'decoder_model_merged_q4f16.onnx_data',
+];
+const MAX_MODEL_FILES = MODEL_FILES_TO_TRACK.length;
+const downloadedFiles = new Map(
+    MODEL_FILES_TO_TRACK.map((fileName) => [fileName, {
+        loaded: 0,
+        total: 0,
+        percent: 0,
+    }])
+);
 const transcriptHistory = [];
 let selectedHistoryId = null;
 
+function formatMegabytes(value) {
+    if (!Number.isFinite(value) || value < 0) {
+        return '0.00 Mo';
+    }
+
+    return `${(value / (1024 * 1024)).toFixed(2)} Mo`;
+}
+
+function getFileName(path) {
+    if (!path) {
+        return 'Fichier inconnu';
+    }
+
+    const chunks = String(path).split('/');
+    return chunks[chunks.length - 1] || String(path);
+}
+
+
+function getTrackedModelFile(path) {
+    const fileName = getFileName(path);
+    return MODEL_FILES_TO_TRACK.find((trackedName) => trackedName === fileName) ?? null;
+}
+
+function renderFileProgress() {
+    progressFiles.innerHTML = '';
+
+    MODEL_FILES_TO_TRACK
+        .map((fileName) => [fileName, downloadedFiles.get(fileName)])
+        .forEach(([file, fileProgress]) => {
+            const item = document.createElement('li');
+            item.className = 'progress-file-item';
+
+            const name = document.createElement('span');
+            name.className = 'progress-file-name';
+            name.textContent = getFileName(file);
+
+            const size = document.createElement('span');
+            size.className = 'progress-file-size';
+            const loadedText = formatMegabytes(fileProgress.loaded);
+            const totalText = fileProgress.total ? formatMegabytes(fileProgress.total) : '...';
+            size.textContent = `${loadedText} / ${totalText}`;
+
+            item.append(name, size);
+            progressFiles.appendChild(item);
+        });
+}
+
 function updateProgressUI() {
-    const loadedCount = Math.min(downloadedFiles.size, MAX_MODEL_FILES);
-    const totalPercent = Array.from(downloadedFiles.values()).reduce((acc, val) => acc + val, 0);
+    const trackedFiles = MODEL_FILES_TO_TRACK.map((fileName) => downloadedFiles.get(fileName));
+    const loadedCount = trackedFiles.filter((item) => item.percent >= 100).length;
+    const totalPercent = trackedFiles.reduce((acc, val) => acc + val.percent, 0);
     const normalizedPercent = Math.min(100, Math.round(totalPercent / MAX_MODEL_FILES));
 
     progressBar.style.width = `${normalizedPercent}%`;
@@ -38,6 +99,8 @@ function updateProgressUI() {
     if (loadedCount >= MAX_MODEL_FILES) {
         progressLabel.textContent = 'Fichiers modèle téléchargés';
     }
+
+    renderFileProgress();
 }
 
 function trackModelDownload(progressInfo) {
@@ -45,19 +108,41 @@ function trackModelDownload(progressInfo) {
         return;
     }
 
+    const trackedFileName = getTrackedModelFile(progressInfo.file);
+    if (!trackedFileName) {
+        return;
+    }
+
+    const existingFileProgress = downloadedFiles.get(trackedFileName) ?? {
+        loaded: 0,
+        total: progressInfo.total || 0,
+        percent: 0,
+    };
+
     if (progressInfo.status === 'done') {
-        downloadedFiles.set(progressInfo.file, 100);
+        downloadedFiles.set(trackedFileName, {
+            loaded: progressInfo.total ?? existingFileProgress.total,
+            total: progressInfo.total ?? existingFileProgress.total,
+            percent: 100,
+        });
         updateProgressUI();
         return;
     }
 
     if (progressInfo.status === 'progress') {
+        const loaded = progressInfo.loaded ?? existingFileProgress.loaded;
+        const total = progressInfo.total ?? existingFileProgress.total;
         const currentPercent = progressInfo.progress ?? (
-            progressInfo.total
-                ? (progressInfo.loaded / progressInfo.total) * 100
-                : 0
+            total
+                ? (loaded / total) * 100
+                : existingFileProgress.percent
         );
-        downloadedFiles.set(progressInfo.file, Math.max(0, Math.min(100, currentPercent)));
+
+        downloadedFiles.set(trackedFileName, {
+            loaded,
+            total,
+            percent: Math.max(0, Math.min(100, currentPercent)),
+        });
         updateProgressUI();
     }
 }
@@ -68,7 +153,7 @@ function hideProgressIfReady() {
     progressLabel.textContent = 'Téléchargement terminé';
     setTimeout(() => {
         progressContainer.classList.add('hidden');
-    }, 800);
+    }, 1100);
 }
 
 function formatDate(timestamp) {
@@ -163,6 +248,7 @@ async function initModel() {
     }
 }
 
+updateProgressUI();
 initModel();
 renderHistory();
 
@@ -218,6 +304,8 @@ generateBtn.onclick = async () => {
     status.textContent = "Transcription en cours...";
     generateBtn.disabled = true;
     output.textContent = "";
+    throughputInfo.classList.add('hidden');
+    throughputInfo.textContent = '';
 
     try {
         const conversation = [
@@ -243,11 +331,23 @@ generateBtn.onclick = async () => {
             }
         });
 
+        const generationStart = performance.now();
+
         await model.generate({
             ...inputs,
             max_new_tokens: 256,
             streamer,
         });
+
+        const generationDurationSeconds = (performance.now() - generationStart) / 1000;
+        const tokenIds = processor.tokenizer.encode(output.textContent, { add_special_tokens: false });
+        const generatedTokens = tokenIds.length;
+        const tokensPerSecond = generationDurationSeconds > 0
+            ? generatedTokens / generationDurationSeconds
+            : 0;
+
+        throughputInfo.textContent = `Débit transcript : ${tokensPerSecond.toFixed(2)} tokens/s (${generatedTokens} tokens)`;
+        throughputInfo.classList.remove('hidden');
 
         addTranscriptToHistory(output.textContent);
         status.textContent = "Terminé !";
