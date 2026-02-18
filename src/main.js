@@ -29,17 +29,11 @@ const MODEL_FILES_TO_TRACK = [
     'audio_encoder_q4f16.onnx_data',
     'decoder_model_merged_q4f16.onnx_data',
 ];
-
-const DEFAULT_MODEL_FILE_TOTALS = {
-    'embed_tokens_fp16.onnx_data': 192 * 1024 * 1024,
-    'audio_encoder_q4f16.onnx_data': 357 * 1024 * 1024,
-    'decoder_model_merged_q4f16.onnx_data': 312 * 1024 * 1024,
-};
 const MAX_MODEL_FILES = MODEL_FILES_TO_TRACK.length;
 const downloadedFiles = new Map(
     MODEL_FILES_TO_TRACK.map((fileName) => [fileName, {
         loaded: 0,
-        total: DEFAULT_MODEL_FILE_TOTALS[fileName] || 0,
+        total: 0,
         percent: 0,
     }])
 );
@@ -63,32 +57,11 @@ function getFileName(path) {
     return chunks[chunks.length - 1] || String(path);
 }
 
-
-function getTrackedModelFile(progressInfo) {
-    const candidates = [
-        progressInfo?.name,
-        progressInfo?.file,
-        progressInfo?.url,
-        progressInfo?.source,
-    ]
-        .filter(Boolean)
-        .map((value) => String(value));
-
-    for (const trackedName of MODEL_FILES_TO_TRACK) {
-        const hasMatch = candidates.some((candidate) => candidate.includes(trackedName));
-        if (hasMatch) {
-            return trackedName;
-        }
-    }
-
-    return null;
-}
-
 function renderFileProgress() {
     progressFiles.innerHTML = '';
 
-    MODEL_FILES_TO_TRACK
-        .map((fileName) => [fileName, downloadedFiles.get(fileName)])
+    Array.from(downloadedFiles.entries())
+        .slice(0, MAX_MODEL_FILES)
         .forEach(([file, fileProgress]) => {
             const item = document.createElement('li');
             item.className = 'progress-file-item';
@@ -109,7 +82,7 @@ function renderFileProgress() {
 }
 
 function updateProgressUI() {
-    const trackedFiles = MODEL_FILES_TO_TRACK.map((fileName) => downloadedFiles.get(fileName));
+    const trackedFiles = Array.from(downloadedFiles.values()).slice(0, MAX_MODEL_FILES);
     const loadedCount = trackedFiles.filter((item) => item.percent >= 100).length;
     const totalPercent = trackedFiles.reduce((acc, val) => acc + val.percent, 0);
     const normalizedPercent = Math.min(100, Math.round(totalPercent / MAX_MODEL_FILES));
@@ -129,22 +102,16 @@ function trackModelDownload(progressInfo) {
         return;
     }
 
-    const trackedFileName = getTrackedModelFile(progressInfo);
-    if (!trackedFileName) {
-        return;
-    }
-
-    const existingFileProgress = downloadedFiles.get(trackedFileName) ?? {
+    const existingFileProgress = downloadedFiles.get(progressInfo.file) ?? {
         loaded: 0,
-        total: DEFAULT_MODEL_FILE_TOTALS[trackedFileName] || progressInfo.total || 0,
+        total: progressInfo.total || 0,
         percent: 0,
     };
 
     if (progressInfo.status === 'done') {
-        const doneTotal = progressInfo.total ?? existingFileProgress.total;
-        downloadedFiles.set(trackedFileName, {
-            loaded: doneTotal,
-            total: doneTotal,
+        downloadedFiles.set(progressInfo.file, {
+            loaded: progressInfo.total ?? existingFileProgress.total,
+            total: progressInfo.total ?? existingFileProgress.total,
             percent: 100,
         });
         updateProgressUI();
@@ -153,14 +120,14 @@ function trackModelDownload(progressInfo) {
 
     if (progressInfo.status === 'progress') {
         const loaded = progressInfo.loaded ?? existingFileProgress.loaded;
-        const total = progressInfo.total ?? existingFileProgress.total ?? DEFAULT_MODEL_FILE_TOTALS[trackedFileName] ?? 0;
+        const total = progressInfo.total ?? existingFileProgress.total;
         const currentPercent = progressInfo.progress ?? (
             total
                 ? (loaded / total) * 100
                 : existingFileProgress.percent
         );
 
-        downloadedFiles.set(trackedFileName, {
+        downloadedFiles.set(progressInfo.file, {
             loaded,
             total,
             percent: Math.max(0, Math.min(100, currentPercent)),
@@ -181,7 +148,9 @@ function finalizeProgressUI() {
     });
 
     progressLabel.textContent = 'Téléchargement terminé';
-    updateProgressUI();
+    setTimeout(() => {
+        progressContainer.classList.add('hidden');
+    }, 1100);
 }
 
 function formatDate(timestamp) {
@@ -260,8 +229,8 @@ async function initModel() {
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "fp16",
-                audio_encoder: "q4",
-                decoder_model_merged: "q4",
+                audio_encoder: "q4f16",
+                decoder_model_merged: "q4f16",
             },
             device: "webgpu",
             progress_callback,
