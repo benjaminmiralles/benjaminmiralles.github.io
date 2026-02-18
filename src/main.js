@@ -252,6 +252,7 @@ async function initModel() {
         processor = await VoxtralProcessor.from_pretrained(model_id, {
             progress_callback,
         });
+				
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "fp16",
@@ -342,7 +343,9 @@ generateBtn.onclick = async () => {
             }
         ];
         const text = processor.apply_chat_template(conversation, { tokenize: false });
+		console.log(text);
         const inputs = await processor(text, audioBuffer);
+		console.log(inputs);
 
         const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
@@ -352,6 +355,7 @@ generateBtn.onclick = async () => {
 				console.log(t);
             }
         });
+		console.log(streamer);
 
         const generationStart = performance.now();
 
