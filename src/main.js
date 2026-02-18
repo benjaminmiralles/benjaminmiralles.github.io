@@ -381,14 +381,28 @@ generateBtn.onclick = async () => {
 };
 
 summarizeBtn.onclick = async () => {
-  try {
+    if (!model || !processor) {
+        recordStatus.textContent = "Erreur : Le modèle n'est pas encore chargé.";
+        return;
+    }
+
+    const transcriptText = output.textContent.trim();
+    if (!transcriptText) {
+        recordStatus.textContent = "Erreur : Aucun transcript à résumer.";
+        return;
+    }
+
+    summarizeBtn.disabled = true;
+    summaryOutput.textContent = '';
+
+    try {
         const conversation2 = [
 			{
 				"role": "user",
 				"content": [
 					{
 						"type": "text",
-						"text": "Fais-moi un résumé du transcript que tu as réalisé : " + summaryOutput.textContent
+						"text": "Fais-moi un résumé du transcript que tu as réalisé : " + transcriptText
 					},
 				],
 			}
@@ -414,5 +428,6 @@ summarizeBtn.onclick = async () => {
         recordStatus.textContent = "Erreur génération : " + error.message;
         console.error(error);
     } finally {
-        generateBtn.disabled = false;
-    }};
+        summarizeBtn.disabled = false;
+    }
+};
