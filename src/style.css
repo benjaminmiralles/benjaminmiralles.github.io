@@ -127,6 +127,33 @@ body {
   margin: 0;
 }
 
+
+.prompt-label {
+  display: block;
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.prompt-input {
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 0.65rem;
+  margin-bottom: 0.65rem;
+  font: inherit;
+  line-height: 1.4;
+  resize: vertical;
+  background: #ffffff;
+}
+
+.prompt-input:focus {
+  outline: 2px solid #a5b4fc;
+  outline-offset: 1px;
+  border-color: #6366f1;
+}
+
 .recording {
   color: #dc2626;
   font-weight: 700;
