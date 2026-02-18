@@ -24,8 +24,19 @@ let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
 
-const MAX_MODEL_FILES = 3;
-const downloadedFiles = new Map();
+const MODEL_FILES_TO_TRACK = [
+    'embed_tokens_fp16.onnx_data',
+    'audio_encoder_q4f16.onnx_data',
+    'decoder_model_merged_q4f16.onnx_data',
+];
+const MAX_MODEL_FILES = MODEL_FILES_TO_TRACK.length;
+const downloadedFiles = new Map(
+    MODEL_FILES_TO_TRACK.map((fileName) => [fileName, {
+        loaded: 0,
+        total: 0,
+        percent: 0,
+    }])
+);
 const transcriptHistory = [];
 let selectedHistoryId = null;
 
@@ -226,6 +237,7 @@ async function initModel() {
     }
 }
 
+updateProgressUI();
 initModel();
 renderHistory();
 
