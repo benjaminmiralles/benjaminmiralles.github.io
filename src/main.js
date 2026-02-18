@@ -357,7 +357,7 @@ generateBtn.onclick = async () => {
 
         await model.generate({
             ...inputs,
-            max_new_tokens: 256,
+            max_new_tokens: 512,
             streamer,
         });
 
@@ -403,7 +403,7 @@ summarizeBtn.onclick = async () => {
 				"content": [
 					{
 						"type": "text",
-						"text": "Agis comme un assistant expert en rédaction de comptes-rendus. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Génère un résumé structuré à partir de la transcription suivante :" + transcriptText
+						"text": "Agis comme un assistant expert en rédaction de comptes-rendus. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :" + transcriptText
 					},
 				],
 			}
@@ -421,7 +421,7 @@ summarizeBtn.onclick = async () => {
 
         await model.generate({
             ...inputs2,
-            max_new_tokens: 256,
+            max_new_tokens: 512,
             streamer,
         });
 		
