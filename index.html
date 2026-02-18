@@ -26,6 +26,7 @@
         <div id="historyList" class="history-list">
           <p id="emptyHistory" class="empty-history">Aucune transcription pour le moment.</p>
         </div>
+        <button id="clearHistoryBtn" class="clear-history-btn" type="button">Supprimer tous les transcripts</button>
       </aside>
 
       <main class="content" id="app">
@@ -48,15 +49,14 @@
           <button id="summarize" disabled>Lancer le résumé</button>
         </div>
 
+        <div id="recordStatus"></div>
+
+        <h2 class="section-title">Transcript</h2>
         <label for="transcriptPromptSelect" class="prompt-label">Prompt de transcription</label>
         <select id="transcriptPromptSelect" class="prompt-select">
           <option value="default" selected>Français (défaut)</option>
           <option value="medecin-allemand">Médecin Allemand</option>
         </select>
-
-        <div id="recordStatus"></div>
-
-        <h2 class="section-title">Transcript</h2>
         <pre id="output"></pre>
 
         <h2 class="section-title">Résumé</h2>

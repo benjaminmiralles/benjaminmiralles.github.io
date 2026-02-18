@@ -23,6 +23,7 @@ const transcriptPromptSelect = document.getElementById('transcriptPromptSelect')
 const historyList = document.getElementById('historyList');
 const emptyHistory = document.getElementById('emptyHistory');
 const themeToggle = document.getElementById('themeToggle');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
 
 let model = null;
 let processor = null;
@@ -415,6 +416,14 @@ function deleteHistoryEntry(entryId) {
     renderHistory();
 }
 
+function clearHistory() {
+    transcriptHistory.splice(0, transcriptHistory.length);
+    selectedHistoryId = null;
+    applyEntryToView(null);
+    saveHistoryToStorage();
+    renderHistory();
+}
+
 function addTranscriptToHistory(text) {
     const cleanText = text.trim();
     if (!cleanText) {
@@ -668,3 +677,7 @@ summarizeBtn.onclick = async () => {
         summarizeBtn.disabled = false;
     }
 };
+
+clearHistoryBtn?.addEventListener('click', () => {
+    clearHistory();
+});

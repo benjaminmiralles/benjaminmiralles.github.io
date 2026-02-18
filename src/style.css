@@ -51,6 +51,8 @@ body {
 }
 
 .sidebar {
+  display: flex;
+  flex-direction: column;
   border-right: 1px solid var(--sidebar-border);
   padding: 1.25rem;
   background: var(--sidebar-bg);
@@ -91,7 +93,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  max-height: calc(100vh - 140px);
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
 }
 
@@ -249,6 +252,20 @@ button:disabled {
   color: #6b7280;
 }
 
+
+.clear-history-btn {
+  margin-top: 0.9rem;
+  width: 100%;
+  border-color: var(--danger);
+  color: var(--danger-text);
+  background: var(--danger-bg);
+}
+
+.clear-history-btn:hover {
+  border-color: var(--danger);
+  background: var(--danger-soft);
+}
+
 .progress-wrapper {
   position: absolute;
   top: 1rem;
@@ -350,10 +367,6 @@ button:disabled {
   .sidebar {
     border-right: none;
     border-bottom: 1px solid #e5e7eb;
-  }
-
-  .history-list {
-    max-height: 220px;
   }
 
   .progress-wrapper {
