@@ -104,17 +104,27 @@ body {
 
 .controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   margin-bottom: 0.8rem;
 }
 
-#output {
+.section-title {
+  margin: 0.8rem 0 0.45rem;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+#output,
+#summaryOutput {
   white-space: pre-wrap;
   background: #f9fafb;
   padding: 15px;
   border-radius: 8px;
   min-height: 180px;
   border: 1px solid #e5e7eb;
+  margin: 0;
 }
 
 .recording {
@@ -146,7 +156,10 @@ button:hover {
 
 button:disabled {
   cursor: not-allowed;
-  opacity: 0.6;
+  opacity: 1;
+  background: #d1d5db;
+  border-color: #9ca3af;
+  color: #6b7280;
 }
 
 .progress-wrapper {

@@ -4,10 +4,11 @@ import {
     TextStreamer
 } from "@huggingface/transformers";
 
-const status = document.getElementById('status');
 const recordStatus = document.getElementById('recordStatus');
 const output = document.getElementById('output');
+const summaryOutput = document.getElementById('summaryOutput');
 const generateBtn = document.getElementById('generate');
+const summarizeBtn = document.getElementById('summarize');
 const recordBtn = document.getElementById('recordBtn');
 const progressContainer = document.getElementById('loadingProgress');
 const progressLabel = document.getElementById('progressLabel');
@@ -214,7 +215,7 @@ function renderHistory() {
         button.addEventListener('click', () => {
             selectedHistoryId = entry.id;
             output.textContent = entry.text;
-            status.textContent = `Historique affiché (${formatDate(entry.createdAt)})`;
+            summarizeBtn.disabled = false;
             renderHistory();
         });
 
@@ -243,7 +244,6 @@ function addTranscriptToHistory(text) {
 
 async function initModel() {
     try {
-        status.textContent = "Chargement du modèle Voxtral (WebGPU)...";
         recordBtn.disabled = true;
 
         const model_id = "onnx-community/Voxtral-Mini-3B-2507-ONNX";
@@ -263,10 +263,9 @@ async function initModel() {
         });
 
         finalizeProgressUI();
-        status.textContent = "Modèle prêt ! Enregistrez un message.";
         recordBtn.disabled = false;
     } catch (e) {
-        status.textContent = "Erreur de chargement : " + e.message;
+        recordStatus.textContent = "Erreur de chargement : " + e.message;
         console.error("Erreur initModel:", e);
     }
 }
@@ -297,12 +296,11 @@ recordBtn.onclick = async () => {
             const decoded = await audioContext.decodeAudioData(arrayBuffer);
 
             audioBuffer = decoded.getChannelData(0);
+            summarizeBtn.disabled = true;
+            summaryOutput.textContent = '';
 
             if (model) {
                 generateBtn.disabled = false;
-                status.textContent = "Audio prêt. Cliquez sur Lancer.";
-            } else {
-                status.textContent = "Audio prêt, mais le modèle charge encore...";
             }
         };
 
@@ -310,22 +308,22 @@ recordBtn.onclick = async () => {
         recordBtn.textContent = "Arrêter l'enregistrement";
         recordStatus.innerHTML = '<span class="recording">● Enregistrement en cours...</span>';
     } catch (err) {
-        status.textContent = "Erreur micro : " + err.message;
+        recordStatus.textContent = "Erreur micro : " + err.message;
     }
 };
 
 generateBtn.onclick = async () => {
     if (!model || !processor) {
-        status.textContent = "Erreur : Le modèle n'est pas encore chargé.";
+        recordStatus.textContent = "Erreur : Le modèle n'est pas encore chargé.";
         return;
     }
     if (!audioBuffer) {
-        status.textContent = "Erreur : Aucun audio enregistré.";
+        recordStatus.textContent = "Erreur : Aucun audio enregistré.";
         return;
     }
 
-    status.textContent = "Transcription en cours...";
     generateBtn.disabled = true;
+    summarizeBtn.disabled = true;
     output.textContent = "";
     throughputInfo.classList.add('hidden');
     throughputInfo.textContent = '';
@@ -373,11 +371,15 @@ generateBtn.onclick = async () => {
         throughputInfo.classList.remove('hidden');
 
         addTranscriptToHistory(output.textContent);
-        status.textContent = "Terminé !";
+        summarizeBtn.disabled = false;
     } catch (error) {
-        status.textContent = "Erreur génération : " + error.message;
+        recordStatus.textContent = "Erreur génération : " + error.message;
         console.error(error);
     } finally {
         generateBtn.disabled = false;
     }
+};
+
+summarizeBtn.onclick = () => {
+    // Logique de résumé volontairement non implémentée.
 };
