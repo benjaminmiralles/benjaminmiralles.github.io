@@ -312,3 +312,28 @@ button:disabled {
   }
 }
 
+
+.history-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: stretch;
+}
+
+.history-row .history-item {
+  flex: 1;
+}
+
+.history-delete {
+  border: 1px solid #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.8rem;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.history-delete:hover {
+  border-color: #ef4444;
+  background: #fee2e2;
+}

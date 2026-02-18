@@ -29,10 +29,7 @@ let audioChunks = [];
 let audioBuffer = null;
 
 const DEFAULT_SUMMARY_PROMPT = "Résume ma transcription. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :";
-
-if (summaryPromptInput) {
-    summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
-}
+const HISTORY_STORAGE_KEY = 'voxtral-transcript-history';
 
 const MODEL_FILES_TO_TRACK = [
     'embed_tokens_fp16.onnx_data',
@@ -55,6 +52,78 @@ const downloadedFiles = new Map(
 const transcriptHistory = [];
 let selectedHistoryId = null;
 
+if (summaryPromptInput) {
+    summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
+}
+
+function normalizeHistoryEntry(rawEntry) {
+    if (!rawEntry || typeof rawEntry !== 'object') {
+        return null;
+    }
+
+    const text = typeof rawEntry.text === 'string' ? rawEntry.text.trim() : '';
+    if (!text) {
+        return null;
+    }
+
+    const id = Number.isFinite(Number(rawEntry.id)) ? Number(rawEntry.id) : Date.now();
+    const createdAtDate = new Date(rawEntry.createdAt || Date.now());
+    const createdAt = Number.isNaN(createdAtDate.getTime()) ? new Date() : createdAtDate;
+    const preview = text.length > 40 ? `${text.slice(0, 40)}…` : text;
+
+    return {
+        id,
+        createdAt,
+        preview,
+        text,
+        summaryPrompt: typeof rawEntry.summaryPrompt === 'string' && rawEntry.summaryPrompt.trim()
+            ? rawEntry.summaryPrompt
+            : DEFAULT_SUMMARY_PROMPT,
+        summary: typeof rawEntry.summary === 'string' ? rawEntry.summary : '',
+    };
+}
+
+function loadHistoryFromStorage() {
+    let parsedHistory = [];
+
+    try {
+        const raw = localStorage.getItem(HISTORY_STORAGE_KEY);
+        if (!raw) {
+            return;
+        }
+
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) {
+            parsedHistory = parsed;
+        }
+    } catch (error) {
+        console.warn('Impossible de charger l\'historique local :', error);
+        return;
+    }
+
+    const sanitizedHistory = parsedHistory
+        .map(normalizeHistoryEntry)
+        .filter(Boolean)
+        .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+
+    transcriptHistory.splice(0, transcriptHistory.length, ...sanitizedHistory);
+}
+
+function saveHistoryToStorage() {
+    const serializableHistory = transcriptHistory.map((entry) => ({
+        id: entry.id,
+        createdAt: entry.createdAt.toISOString(),
+        text: entry.text,
+        summaryPrompt: entry.summaryPrompt,
+        summary: entry.summary,
+    }));
+
+    try {
+        localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(serializableHistory));
+    } catch (error) {
+        console.warn('Impossible d\'enregistrer l\'historique local :', error);
+    }
+}
 
 function updateThroughputBarVisibility() {
     const hasVisibleCounter = !throughputInfo.classList.contains('hidden')
@@ -204,8 +273,31 @@ function formatDate(timestamp) {
     }).format(timestamp);
 }
 
+function getSelectedEntry() {
+    return transcriptHistory.find((entry) => entry.id === selectedHistoryId) ?? null;
+}
+
+function applyEntryToView(entry) {
+    if (!entry) {
+        output.textContent = '';
+        summaryOutput.textContent = '';
+        if (summaryPromptInput) {
+            summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
+        }
+        summarizeBtn.disabled = true;
+        return;
+    }
+
+    output.textContent = entry.text;
+    summaryOutput.textContent = entry.summary || '';
+    if (summaryPromptInput) {
+        summaryPromptInput.value = entry.summaryPrompt || DEFAULT_SUMMARY_PROMPT;
+    }
+    summarizeBtn.disabled = false;
+}
+
 function renderHistory() {
-    historyList.querySelectorAll('.history-item').forEach((item) => item.remove());
+    historyList.querySelectorAll('.history-row').forEach((item) => item.remove());
 
     if (transcriptHistory.length === 0) {
         emptyHistory.classList.remove('hidden');
@@ -215,6 +307,9 @@ function renderHistory() {
     emptyHistory.classList.add('hidden');
 
     transcriptHistory.forEach((entry) => {
+        const row = document.createElement('div');
+        row.className = 'history-row';
+
         const button = document.createElement('button');
         button.type = 'button';
         button.className = `history-item${entry.id === selectedHistoryId ? ' active' : ''}`;
@@ -231,13 +326,55 @@ function renderHistory() {
         button.append(title, subtitle);
         button.addEventListener('click', () => {
             selectedHistoryId = entry.id;
-            output.textContent = entry.text;
-            summarizeBtn.disabled = false;
+            applyEntryToView(entry);
             renderHistory();
         });
 
-        historyList.appendChild(button);
+        const deleteButton = document.createElement('button');
+        deleteButton.type = 'button';
+        deleteButton.className = 'history-delete';
+        deleteButton.setAttribute('aria-label', 'Supprimer cette transcription');
+        deleteButton.textContent = 'Supprimer';
+        deleteButton.addEventListener('click', () => {
+            deleteHistoryEntry(entry.id);
+        });
+
+        row.append(button, deleteButton);
+        historyList.appendChild(row);
     });
+}
+
+function updateSelectedEntry(patch) {
+    const entry = getSelectedEntry();
+    if (!entry) {
+        return;
+    }
+
+    Object.assign(entry, patch);
+    if (typeof entry.text === 'string') {
+        const cleanText = entry.text.trim();
+        entry.preview = cleanText.length > 40 ? `${cleanText.slice(0, 40)}…` : cleanText;
+    }
+
+    saveHistoryToStorage();
+    renderHistory();
+}
+
+function deleteHistoryEntry(entryId) {
+    const index = transcriptHistory.findIndex((entry) => entry.id === entryId);
+    if (index === -1) {
+        return;
+    }
+
+    transcriptHistory.splice(index, 1);
+
+    if (selectedHistoryId === entryId) {
+        selectedHistoryId = transcriptHistory[0]?.id ?? null;
+        applyEntryToView(getSelectedEntry());
+    }
+
+    saveHistoryToStorage();
+    renderHistory();
 }
 
 function addTranscriptToHistory(text) {
@@ -248,14 +385,17 @@ function addTranscriptToHistory(text) {
 
     const preview = cleanText.length > 40 ? `${cleanText.slice(0, 40)}…` : cleanText;
     const entry = {
-        id: Date.now(),
+        id: Date.now() + Math.floor(Math.random() * 1000),
         createdAt: new Date(),
         preview,
         text: cleanText,
+        summaryPrompt: summaryPromptInput?.value?.trim() || DEFAULT_SUMMARY_PROMPT,
+        summary: '',
     };
 
     transcriptHistory.unshift(entry);
     selectedHistoryId = entry.id;
+    saveHistoryToStorage();
     renderHistory();
 }
 
@@ -269,7 +409,7 @@ async function initModel() {
         processor = await VoxtralProcessor.from_pretrained(model_id, {
             progress_callback,
         });
-				
+
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "fp16",
@@ -288,10 +428,20 @@ async function initModel() {
     }
 }
 
+loadHistoryFromStorage();
+if (transcriptHistory.length > 0) {
+    selectedHistoryId = transcriptHistory[0].id;
+    applyEntryToView(transcriptHistory[0]);
+}
 updateProgressUI();
 initModel();
 renderHistory();
 updateThroughputBarVisibility();
+
+summaryPromptInput?.addEventListener('input', () => {
+    const value = summaryPromptInput.value || DEFAULT_SUMMARY_PROMPT;
+    updateSelectedEntry({ summaryPrompt: value });
+});
 
 recordBtn.onclick = async () => {
     if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -463,7 +613,12 @@ summarizeBtn.onclick = async () => {
         summaryThroughputInfo.textContent = `Débit résumé : ${tokensPerSecond.toFixed(2)} tokens/s (${generatedTokens} tokens)`;
         summaryThroughputInfo.classList.remove('hidden');
         updateThroughputBarVisibility();
-		
+
+        updateSelectedEntry({
+            text: transcriptText,
+            summaryPrompt,
+            summary: summaryOutput.textContent,
+        });
     } catch (error) {
         recordStatus.textContent = "Erreur génération : " + error.message;
         console.error(error);
