@@ -19,6 +19,7 @@ const progressFiles = document.getElementById('progressFiles');
 const throughputInfo = document.getElementById('throughputInfo');
 const summaryThroughputInfo = document.getElementById('summaryThroughputInfo');
 const throughputBar = document.querySelector('.throughput-bar');
+const transcriptPromptSelect = document.getElementById('transcriptPromptSelect');
 const historyList = document.getElementById('historyList');
 const emptyHistory = document.getElementById('emptyHistory');
 const themeToggle = document.getElementById('themeToggle');
@@ -30,6 +31,10 @@ let audioChunks = [];
 let audioBuffer = null;
 
 const DEFAULT_SUMMARY_PROMPT = "Résume ma transcription. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :";
+const TRANSCRIPT_PROMPTS = {
+    default: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations (euh, ah). Sois très précis sur les termes techniques.",
+    'medecin-allemand': "Transcris cet audio en allemand. Ajoute la ponctuation et corrige les hésitations (euh, ah). Sois très précis sur les termes techniques, en particulier les termes médicaux.",
+};
 const HISTORY_STORAGE_KEY = 'voxtral-transcript-history';
 const THEME_STORAGE_KEY = 'voxtral-theme';
 
@@ -58,6 +63,14 @@ if (summaryPromptInput) {
     summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
 }
 
+if (transcriptPromptSelect) {
+    transcriptPromptSelect.value = 'default';
+}
+
+function getTranscriptPrompt() {
+    const selectedPromptKey = transcriptPromptSelect?.value || 'default';
+    return TRANSCRIPT_PROMPTS[selectedPromptKey] || TRANSCRIPT_PROMPTS.default;
+}
 
 function applyTheme(theme) {
     const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
@@ -478,6 +491,9 @@ recordBtn.onclick = async () => {
     }
 
     try {
+        output.textContent = '';
+        summaryOutput.textContent = '';
+
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         mediaRecorder = new MediaRecorder(stream);
         audioChunks = [];
@@ -534,7 +550,7 @@ generateBtn.onclick = async () => {
                     { type: "audio" },
                     {
                         type: "text",
-                        text: "Transcris cet audio en français. Ajoute la ponctuation et corrige les hésitations (euh, ah). Sois très précis sur les termes techniques."
+                        text: getTranscriptPrompt()
                     },
                 ],
             }

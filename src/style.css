@@ -190,6 +190,24 @@ body {
   color: var(--text-primary);
 }
 
+.prompt-select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  margin-bottom: 0.65rem;
+  font: inherit;
+  line-height: 1.4;
+  background: var(--surface-1);
+  color: var(--text-primary);
+}
+
+.prompt-select:focus {
+  outline: 2px solid #a5b4fc;
+  outline-offset: 1px;
+  border-color: #6366f1;
+}
+
 .prompt-input:focus {
   outline: 2px solid #a5b4fc;
   outline-offset: 1px;
