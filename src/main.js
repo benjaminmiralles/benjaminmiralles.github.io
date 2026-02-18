@@ -380,7 +380,7 @@ generateBtn.onclick = async () => {
     }
 };
 
-summarizeBtn.onclick = () => {
+summarizeBtn.onclick = async () => {
   try {
         conversation2 = [
 			{
