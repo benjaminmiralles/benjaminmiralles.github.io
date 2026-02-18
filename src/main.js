@@ -394,7 +394,7 @@ summarizeBtn.onclick = () => {
 			}
 		];
         const text2 = processor.apply_chat_template(conversation2, { tokenize: false });
-        const inputs2 = await processor2(text2);
+        const inputs2 = await processor(text2);
 
         const streamer2 = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
