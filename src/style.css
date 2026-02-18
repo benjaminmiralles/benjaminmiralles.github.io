@@ -22,7 +22,8 @@ body {
 .layout {
   display: grid;
   grid-template-columns: 280px 1fr;
-  max-width: 1200px;
+  width: min(1600px, 100%);
+  max-width: 1600px;
   min-height: 100vh;
   margin: 0 auto;
   background: #ffffff;
@@ -94,7 +95,7 @@ body {
 
 .content {
   position: relative;
-  padding: 1.5rem;
+  padding: 1.5rem 1.2rem 5.5rem;
 }
 
 .content h1 {
@@ -259,11 +260,27 @@ button:disabled {
   white-space: nowrap;
 }
 
+.throughput-bar {
+  position: fixed;
+  left: 50%;
+  bottom: 0.85rem;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.72);
+  border: 1px solid rgba(209, 213, 219, 0.85);
+  border-radius: 9999px;
+  backdrop-filter: blur(4px);
+  padding: 0.32rem 0.9rem;
+}
+
 .throughput-info {
-  margin-top: 0.6rem;
-  color: #111827;
-  font-size: 0.9rem;
-  font-weight: 600;
+  margin: 0;
+  color: #4b5563;
+  font-size: 0.8rem;
+  font-weight: 500;
 }
 
 @media (max-width: 900px) {
@@ -285,4 +302,13 @@ button:disabled {
     margin-bottom: 0.9rem;
     width: 100%;
   }
+
+  .throughput-bar {
+    width: calc(100% - 1.2rem);
+    max-width: 680px;
+    flex-wrap: wrap;
+    justify-content: center;
+    bottom: 0.6rem;
+  }
 }
+

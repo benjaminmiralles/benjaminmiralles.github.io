@@ -17,6 +17,8 @@ const progressText = document.getElementById('progressText');
 const progressBar = document.getElementById('progressBar');
 const progressFiles = document.getElementById('progressFiles');
 const throughputInfo = document.getElementById('throughputInfo');
+const summaryThroughputInfo = document.getElementById('summaryThroughputInfo');
+const throughputBar = document.querySelector('.throughput-bar');
 const historyList = document.getElementById('historyList');
 const emptyHistory = document.getElementById('emptyHistory');
 
@@ -52,6 +54,14 @@ const downloadedFiles = new Map(
 );
 const transcriptHistory = [];
 let selectedHistoryId = null;
+
+
+function updateThroughputBarVisibility() {
+    const hasVisibleCounter = !throughputInfo.classList.contains('hidden')
+        || !summaryThroughputInfo.classList.contains('hidden');
+
+    throughputBar.classList.toggle('hidden', !hasVisibleCounter);
+}
 
 function formatMegabytes(value) {
     if (!Number.isFinite(value) || value < 0) {
@@ -281,6 +291,7 @@ async function initModel() {
 updateProgressUI();
 initModel();
 renderHistory();
+updateThroughputBarVisibility();
 
 recordBtn.onclick = async () => {
     if (mediaRecorder && mediaRecorder.state === "recording") {
@@ -335,6 +346,9 @@ generateBtn.onclick = async () => {
     output.textContent = "";
     throughputInfo.classList.add('hidden');
     throughputInfo.textContent = '';
+    summaryThroughputInfo.classList.add('hidden');
+    summaryThroughputInfo.textContent = '';
+    updateThroughputBarVisibility();
 
     try {
         const conversation = [
@@ -377,6 +391,7 @@ generateBtn.onclick = async () => {
 
         throughputInfo.textContent = `Débit transcript : ${tokensPerSecond.toFixed(2)} tokens/s (${generatedTokens} tokens)`;
         throughputInfo.classList.remove('hidden');
+        updateThroughputBarVisibility();
 
         addTranscriptToHistory(output.textContent);
         summarizeBtn.disabled = false;
@@ -402,6 +417,9 @@ summarizeBtn.onclick = async () => {
 
     summarizeBtn.disabled = true;
     summaryOutput.textContent = '';
+    summaryThroughputInfo.classList.add('hidden');
+    summaryThroughputInfo.textContent = '';
+    updateThroughputBarVisibility();
 
     try {
         const summaryPrompt = summaryPromptInput?.value?.trim() || DEFAULT_SUMMARY_PROMPT;
@@ -427,11 +445,24 @@ summarizeBtn.onclick = async () => {
             }
         });
 
+        const generationStart = performance.now();
+
         await model.generate({
             ...inputs2,
             max_new_tokens: 512,
             streamer,
         });
+
+        const generationDurationSeconds = (performance.now() - generationStart) / 1000;
+        const tokenIds = processor.tokenizer.encode(summaryOutput.textContent, { add_special_tokens: false });
+        const generatedTokens = tokenIds.length;
+        const tokensPerSecond = generationDurationSeconds > 0
+            ? generatedTokens / generationDurationSeconds
+            : 0;
+
+        summaryThroughputInfo.textContent = `Débit résumé : ${tokensPerSecond.toFixed(2)} tokens/s (${generatedTokens} tokens)`;
+        summaryThroughputInfo.classList.remove('hidden');
+        updateThroughputBarVisibility();
 		
     } catch (error) {
         recordStatus.textContent = "Erreur génération : " + error.message;
