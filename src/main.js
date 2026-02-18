@@ -57,17 +57,11 @@ function getFileName(path) {
     return chunks[chunks.length - 1] || String(path);
 }
 
-
-function getTrackedModelFile(path) {
-    const fileName = getFileName(path);
-    return MODEL_FILES_TO_TRACK.find((trackedName) => trackedName === fileName) ?? null;
-}
-
 function renderFileProgress() {
     progressFiles.innerHTML = '';
 
-    MODEL_FILES_TO_TRACK
-        .map((fileName) => [fileName, downloadedFiles.get(fileName)])
+    Array.from(downloadedFiles.entries())
+        .slice(0, MAX_MODEL_FILES)
         .forEach(([file, fileProgress]) => {
             const item = document.createElement('li');
             item.className = 'progress-file-item';
@@ -88,7 +82,7 @@ function renderFileProgress() {
 }
 
 function updateProgressUI() {
-    const trackedFiles = MODEL_FILES_TO_TRACK.map((fileName) => downloadedFiles.get(fileName));
+    const trackedFiles = Array.from(downloadedFiles.values()).slice(0, MAX_MODEL_FILES);
     const loadedCount = trackedFiles.filter((item) => item.percent >= 100).length;
     const totalPercent = trackedFiles.reduce((acc, val) => acc + val.percent, 0);
     const normalizedPercent = Math.min(100, Math.round(totalPercent / MAX_MODEL_FILES));
@@ -108,19 +102,14 @@ function trackModelDownload(progressInfo) {
         return;
     }
 
-    const trackedFileName = getTrackedModelFile(progressInfo.file);
-    if (!trackedFileName) {
-        return;
-    }
-
-    const existingFileProgress = downloadedFiles.get(trackedFileName) ?? {
+    const existingFileProgress = downloadedFiles.get(progressInfo.file) ?? {
         loaded: 0,
         total: progressInfo.total || 0,
         percent: 0,
     };
 
     if (progressInfo.status === 'done') {
-        downloadedFiles.set(trackedFileName, {
+        downloadedFiles.set(progressInfo.file, {
             loaded: progressInfo.total ?? existingFileProgress.total,
             total: progressInfo.total ?? existingFileProgress.total,
             percent: 100,
@@ -138,7 +127,7 @@ function trackModelDownload(progressInfo) {
                 : existingFileProgress.percent
         );
 
-        downloadedFiles.set(trackedFileName, {
+        downloadedFiles.set(progressInfo.file, {
             loaded,
             total,
             percent: Math.max(0, Math.min(100, currentPercent)),
@@ -232,8 +221,8 @@ async function initModel() {
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "fp16",
-                audio_encoder: "q4",
-                decoder_model_merged: "q4",
+                audio_encoder: "q4f16",
+                decoder_model_merged: "q4f16",
             },
             device: "webgpu",
             progress_callback,
