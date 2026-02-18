@@ -343,16 +343,13 @@ generateBtn.onclick = async () => {
             }
         ];
         const text = processor.apply_chat_template(conversation, { tokenize: false });
-		console.log(text);
         const inputs = await processor(text, audioBuffer);
-		console.log(inputs);
 
         const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
             skip_prompt: true,
             callback_function: (t) => {
                 output.textContent += t;
-				console.log(t);
             }
         });
 
@@ -399,7 +396,6 @@ summarizeBtn.onclick = async () => {
     summarizeBtn.disabled = true;
     summaryOutput.textContent = '';
 
-	console.log("log1" + transcriptText);
     try {
         const conversation2 = [
 			{
@@ -407,23 +403,19 @@ summarizeBtn.onclick = async () => {
 				"content": [
 					{
 						"type": "text",
-						"text": "Fais un résumé de ce texte : " + transcriptText
+						"text": "Agis comme un assistant expert en rédaction de comptes-rendus. Génère un résumé structuré à partir de la transcription suivante :" + transcriptText
 					},
 				],
 			}
 		];
         const text2 = processor.apply_chat_template(conversation2, { tokenize: false });
-		console.log(text2);
-
         const inputs2 = await processor(text2);
-		console.log(inputs2);
 
         const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
             skip_prompt: true,
             callback_function: (t) => {
                 summaryOutput.textContent += t;
-				console.log(t);
             }
         });
 
