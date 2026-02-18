@@ -21,6 +21,7 @@ const summaryThroughputInfo = document.getElementById('summaryThroughputInfo');
 const throughputBar = document.querySelector('.throughput-bar');
 const historyList = document.getElementById('historyList');
 const emptyHistory = document.getElementById('emptyHistory');
+const themeToggle = document.getElementById('themeToggle');
 
 let model = null;
 let processor = null;
@@ -30,6 +31,7 @@ let audioBuffer = null;
 
 const DEFAULT_SUMMARY_PROMPT = "Résume ma transcription. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :";
 const HISTORY_STORAGE_KEY = 'voxtral-transcript-history';
+const THEME_STORAGE_KEY = 'voxtral-theme';
 
 const MODEL_FILES_TO_TRACK = [
     'embed_tokens_fp16.onnx_data',
@@ -54,6 +56,29 @@ let selectedHistoryId = null;
 
 if (summaryPromptInput) {
     summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
+}
+
+
+function applyTheme(theme) {
+    const normalizedTheme = theme === 'dark' ? 'dark' : 'light';
+    document.body.dataset.theme = normalizedTheme;
+
+    if (themeToggle) {
+        themeToggle.checked = normalizedTheme === 'dark';
+    }
+}
+
+function initializeTheme() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const preferredDark = window.matchMedia?.('(prefers-color-scheme: dark)')?.matches;
+    const defaultTheme = preferredDark ? 'dark' : 'light';
+    applyTheme(savedTheme || defaultTheme);
+
+    themeToggle?.addEventListener('change', () => {
+        const nextTheme = themeToggle.checked ? 'dark' : 'light';
+        applyTheme(nextTheme);
+        localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    });
 }
 
 function normalizeHistoryEntry(rawEntry) {
@@ -333,8 +358,8 @@ function renderHistory() {
         const deleteButton = document.createElement('button');
         deleteButton.type = 'button';
         deleteButton.className = 'history-delete';
-        deleteButton.setAttribute('aria-label', 'Supprimer cette transcription');
-        deleteButton.textContent = 'Supprimer';
+        deleteButton.setAttribute('aria-label', `Supprimer la transcription du ${formatDate(entry.createdAt)}`);
+        deleteButton.textContent = '✕';
         deleteButton.addEventListener('click', () => {
             deleteHistoryEntry(entry.id);
         });
@@ -434,6 +459,7 @@ if (transcriptHistory.length > 0) {
     applyEntryToView(transcriptHistory[0]);
 }
 updateProgressUI();
+initializeTheme();
 initModel();
 renderHistory();
 updateThroughputBarVisibility();

@@ -16,8 +16,13 @@
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <h2>Historique</h2>
-        <p class="sidebar-help">Retrouvez les transcriptions déjà réalisées.</p>
+        <div class="sidebar-header">
+          <h2>Historique</h2>
+          <label class="theme-switch" for="themeToggle">
+            <input id="themeToggle" type="checkbox" />
+            <span>Mode sombre</span>
+          </label>
+        </div>
         <div id="historyList" class="history-list">
           <p id="emptyHistory" class="empty-history">Aucune transcription pour le moment.</p>
         </div>
@@ -49,11 +54,11 @@
         <pre id="output"></pre>
 
         <h2 class="section-title">Résumé</h2>
-        <label for="summaryPrompt" class="prompt-label">Prompt de résumé (modifiable)</label>
+        <label for="summaryPrompt" class="prompt-label">Prompt de résumé</label>
         <textarea
           id="summaryPrompt"
           class="prompt-input"
-          rows="4"
+          rows="3"
         ></textarea>
         <pre id="summaryOutput"></pre>
 
