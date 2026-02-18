@@ -7,6 +7,7 @@ import {
 const recordStatus = document.getElementById('recordStatus');
 const output = document.getElementById('output');
 const summaryOutput = document.getElementById('summaryOutput');
+const summaryPromptInput = document.getElementById('summaryPrompt');
 const generateBtn = document.getElementById('generate');
 const summarizeBtn = document.getElementById('summarize');
 const recordBtn = document.getElementById('recordBtn');
@@ -24,6 +25,12 @@ let processor = null;
 let mediaRecorder = null;
 let audioChunks = [];
 let audioBuffer = null;
+
+const DEFAULT_SUMMARY_PROMPT = "Agis comme un assistant expert en rédaction de comptes-rendus. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :";
+
+if (summaryPromptInput) {
+    summaryPromptInput.value = DEFAULT_SUMMARY_PROMPT;
+}
 
 const MODEL_FILES_TO_TRACK = [
     'embed_tokens_fp16.onnx_data',
@@ -397,17 +404,18 @@ summarizeBtn.onclick = async () => {
     summaryOutput.textContent = '';
 
     try {
+        const summaryPrompt = summaryPromptInput?.value?.trim() || DEFAULT_SUMMARY_PROMPT;
         const conversation2 = [
-			{
-				"role": "user",
-				"content": [
-					{
-						"type": "text",
-						"text": "Agis comme un assistant expert en rédaction de comptes-rendus. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Commence directement le résumé sans écrire **Résumé** ou similaire. Génère un résumé structuré à partir de la transcription suivante :" + transcriptText
-					},
-				],
-			}
-		];
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": summaryPrompt + transcriptText
+                    },
+                ],
+            }
+        ];
         const text2 = processor.apply_chat_template(conversation2, { tokenize: false });
         const inputs2 = await processor(text2);
 
