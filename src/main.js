@@ -382,7 +382,7 @@ generateBtn.onclick = async () => {
 
 summarizeBtn.onclick = async () => {
   try {
-        conversation2 = [
+        const conversation2 = [
 			{
 				"role": "user",
 				"content": [
