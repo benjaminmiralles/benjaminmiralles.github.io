@@ -210,8 +210,8 @@ async function initModel() {
         model = await VoxtralForConditionalGeneration.from_pretrained(model_id, {
             dtype: {
                 embed_tokens: "fp16",
-                audio_encoder: "q4",
-                decoder_model_merged: "q4",
+                audio_encoder: "q4f16",
+                decoder_model_merged: "q4f16",
             },
             device: "webgpu",
             progress_callback,
