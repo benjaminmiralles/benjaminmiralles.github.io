@@ -350,6 +350,7 @@ generateBtn.onclick = async () => {
             callback_function: (t) => {
                 output.textContent += t;
             }
+			console.log(t);
         });
 
         const generationStart = performance.now();
@@ -395,6 +396,7 @@ summarizeBtn.onclick = async () => {
     summarizeBtn.disabled = true;
     summaryOutput.textContent = '';
 
+	console.log("log1" + transcriptText);
     try {
         const conversation2 = [
 			{
@@ -415,6 +417,7 @@ summarizeBtn.onclick = async () => {
             skip_prompt: true,
             callback_function: (t) => {
                 summaryOutput.textContent += t;
+				console.log(t);
             }
         });
 
