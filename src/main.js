@@ -29,6 +29,11 @@ const MODEL_FILES_TO_TRACK = [
     'audio_encoder_q4f16.onnx_data',
     'decoder_model_merged_q4f16.onnx_data',
 ];
+const DEFAULT_MODEL_FILE_TOTALS = {
+    'embed_tokens_fp16.onnx_data': 192 * 1024 * 1024,
+    'audio_encoder_q4f16.onnx_data': 357 * 1024 * 1024,
+    'decoder_model_merged_q4f16.onnx_data': 312 * 1024 * 1024,
+};
 const MAX_MODEL_FILES = MODEL_FILES_TO_TRACK.length;
 const downloadedFiles = new Map(
     MODEL_FILES_TO_TRACK.map((fileName) => [fileName, {
@@ -55,6 +60,17 @@ function getFileName(path) {
 
     const chunks = String(path).split('/');
     return chunks[chunks.length - 1] || String(path);
+}
+
+function resolveTrackedFile(path) {
+    const rawFileName = getFileName(path).split('?')[0];
+
+    if (MODEL_FILES_TO_TRACK.includes(rawFileName)) {
+        return rawFileName;
+    }
+
+    return MODEL_FILES_TO_TRACK.find((trackedFileName) => rawFileName.includes(trackedFileName))
+        || null;
 }
 
 function renderFileProgress() {
@@ -102,16 +118,26 @@ function trackModelDownload(progressInfo) {
         return;
     }
 
-    const existingFileProgress = downloadedFiles.get(progressInfo.file) ?? {
+    const trackedFile = resolveTrackedFile(progressInfo.file);
+    if (!trackedFile) {
+        return;
+    }
+
+    const existingFileProgress = downloadedFiles.get(trackedFile) ?? {
         loaded: 0,
-        total: progressInfo.total || 0,
+        total: progressInfo.total || DEFAULT_MODEL_FILE_TOTALS[trackedFile] || 0,
         percent: 0,
     };
 
     if (progressInfo.status === 'done') {
-        downloadedFiles.set(progressInfo.file, {
-            loaded: progressInfo.total ?? existingFileProgress.total,
-            total: progressInfo.total ?? existingFileProgress.total,
+        const total = progressInfo.total
+            ?? existingFileProgress.total
+            ?? DEFAULT_MODEL_FILE_TOTALS[trackedFile]
+            ?? 0;
+
+        downloadedFiles.set(trackedFile, {
+            loaded: total,
+            total,
             percent: 100,
         });
         updateProgressUI();
@@ -127,7 +153,7 @@ function trackModelDownload(progressInfo) {
                 : existingFileProgress.percent
         );
 
-        downloadedFiles.set(progressInfo.file, {
+        downloadedFiles.set(trackedFile, {
             loaded,
             total,
             percent: Math.max(0, Math.min(100, currentPercent)),
