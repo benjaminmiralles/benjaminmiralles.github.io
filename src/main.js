@@ -349,8 +349,8 @@ generateBtn.onclick = async () => {
             skip_prompt: true,
             callback_function: (t) => {
                 output.textContent += t;
+				console.log(t);
             }
-			console.log(t);
         });
 
         const generationStart = performance.now();
