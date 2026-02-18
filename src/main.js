@@ -418,7 +418,7 @@ summarizeBtn.onclick = async () => {
         const inputs2 = await processor(text2);
 		console.log(inputs2);
 
-        const streamer2 = new TextStreamer(processor.tokenizer, {
+        const streamer = new TextStreamer(processor.tokenizer, {
             skip_special_tokens: true,
             skip_prompt: true,
             callback_function: (t) => {
@@ -430,7 +430,7 @@ summarizeBtn.onclick = async () => {
         await model.generate({
             ...inputs2,
             max_new_tokens: 256,
-            streamer2,
+            streamer,
         });
 		
     } catch (error) {
