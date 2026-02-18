@@ -403,7 +403,7 @@ summarizeBtn.onclick = async () => {
 				"content": [
 					{
 						"type": "text",
-						"text": "Agis comme un assistant expert en rédaction de comptes-rendus. Génère un résumé structuré à partir de la transcription suivante :" + transcriptText
+						"text": "Agis comme un assistant expert en rédaction de comptes-rendus. Ne mets aucun titre, aucun sous-titre, ni aucune puce. Juste le résumé. Produis uniquement un texte suivi (paragraphes narratifs). Génère un résumé structuré à partir de la transcription suivante :" + transcriptText
 					},
 				],
 			}
