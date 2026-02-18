@@ -98,6 +98,11 @@ body {
   overflow-y: auto;
 }
 
+.sidebar-footer {
+  margin-top: auto;
+  padding-top: 0.9rem;
+}
+
 .history-item {
   width: 100%;
   border: 1px solid var(--border);
@@ -254,7 +259,7 @@ button:disabled {
 
 
 .clear-history-btn {
-  margin-top: 0.9rem;
+  margin-top: 0;
   width: 100%;
   border-color: var(--danger);
   color: var(--danger-text);
