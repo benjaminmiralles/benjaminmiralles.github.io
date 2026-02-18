@@ -388,7 +388,7 @@ summarizeBtn.onclick = async () => {
 				"content": [
 					{
 						"type": "text",
-						"text": "Fais-moi un résumé du transcript que tu as réalisé :",
+						"text": "Fais-moi un résumé du transcript que tu as réalisé : " + summaryOutput.textContent
 					},
 				],
 			}
@@ -407,7 +407,7 @@ summarizeBtn.onclick = async () => {
         await model.generate({
             ...inputs2,
             max_new_tokens: 256,
-            streamer,
+            streamer2,
         });
 		
     } catch (error) {
