@@ -98,7 +98,7 @@ function updateProgressUI() {
 }
 
 function trackModelDownload(progressInfo) {
-    if (!progressInfo || !progressInfo.file) {
+    if (!progressInfo) {
         return;
     }
 
@@ -136,9 +136,17 @@ function trackModelDownload(progressInfo) {
     }
 }
 
-function hideProgressIfReady() {
-    progressBar.style.width = '100%';
-    progressText.textContent = `${MAX_MODEL_FILES} / ${MAX_MODEL_FILES}`;
+function finalizeProgressUI() {
+    MODEL_FILES_TO_TRACK.forEach((fileName) => {
+        const current = downloadedFiles.get(fileName) ?? { loaded: 0, total: 0, percent: 0 };
+        const total = current.total || DEFAULT_MODEL_FILE_TOTALS[fileName] || 0;
+        downloadedFiles.set(fileName, {
+            loaded: total,
+            total,
+            percent: 100,
+        });
+    });
+
     progressLabel.textContent = 'Téléchargement terminé';
     setTimeout(() => {
         progressContainer.classList.add('hidden');
@@ -228,7 +236,7 @@ async function initModel() {
             progress_callback,
         });
 
-        hideProgressIfReady();
+        finalizeProgressUI();
         status.textContent = "Modèle prêt ! Enregistrez un message.";
         recordBtn.disabled = false;
     } catch (e) {
