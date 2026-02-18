@@ -407,7 +407,7 @@ summarizeBtn.onclick = async () => {
 				"content": [
 					{
 						"type": "text",
-						"text": "Fais-moi un résumé du transcript que tu as réalisé : " + transcriptText
+						"text": "Fais un résumé de ce texte : " + transcriptText
 					},
 				],
 			}
